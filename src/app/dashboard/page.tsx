@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Plus, TrendingUp, Radio } from "lucide-react";
 import { HomeLayout } from "@/components/layout/HomeLayout";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import { Button } from "@/components/ui/Button";
 import { ListingStepper } from "@/components/dashboard/ListingStepper";
 import { activeArrays } from "@/lib/data";
@@ -10,6 +11,7 @@ import { activeArrays } from "@/lib/data";
 // Host Control Nexus — earnings stats, forge listing form, and active arrays panel
 export default function DashboardPage() {
   return (
+    <AuthGuard>
     <HomeLayout>
       <div className="flex gap-0 min-h-[calc(100vh-56px)] pt-20">
         {/* Main content area */}
@@ -175,5 +177,6 @@ export default function DashboardPage() {
         </div>
       </footer>
     </HomeLayout>
+    </AuthGuard>
   );
 }

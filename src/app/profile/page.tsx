@@ -3,6 +3,7 @@
 import { Mail, Shield, Calendar, Gamepad2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { HomeLayout } from "@/components/layout/HomeLayout";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth-context";
 
@@ -14,6 +15,7 @@ export default function ProfilePage() {
   const role = user?.user_metadata?.role || "guest";
 
   return (
+    <AuthGuard>
     <HomeLayout>
       <div className="px-8 py-8 pt-24 max-w-3xl mx-auto">
         <h1 className="font-heading text-4xl font-extrabold text-white tracking-wide mb-8">
@@ -77,5 +79,6 @@ export default function ProfilePage() {
         </div>
       </div>
     </HomeLayout>
+    </AuthGuard>
   );
 }

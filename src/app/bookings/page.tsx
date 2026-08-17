@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Calendar, MapPin, Clock, Gamepad2 } from "lucide-react";
 import { HomeLayout } from "@/components/layout/HomeLayout";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import { Button } from "@/components/ui/Button";
 
 const mockBookings = [
@@ -30,6 +31,7 @@ const mockBookings = [
 
 export default function BookingsPage() {
   return (
+    <AuthGuard>
     <HomeLayout>
       <div className="px-8 py-8 pt-24 max-w-5xl mx-auto">
         <h1 className="font-heading text-4xl font-extrabold text-white tracking-wide mb-2">
@@ -106,5 +108,6 @@ export default function BookingsPage() {
         )}
       </div>
     </HomeLayout>
+    </AuthGuard>
   );
 }
