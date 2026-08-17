@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { getSupabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
@@ -25,7 +26,9 @@ export default function LoginPage() {
     if (result.error) {
       setError(result.error);
     } else {
-      router.push("/");
+      const { data: { user } } = await getSupabase().auth.getUser();
+      const role = user?.user_metadata?.role;
+      router.push(role === "host" ? "/dashboard" : "/marketplace");
     }
   };
 

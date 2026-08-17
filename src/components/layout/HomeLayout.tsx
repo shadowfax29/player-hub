@@ -12,7 +12,6 @@ const baseLinks = [
 ];
 
 const hostLinks = [
-  { label: "Explore", href: "/marketplace" },
   { label: "Dashboard", href: "/dashboard" },
 ];
 
