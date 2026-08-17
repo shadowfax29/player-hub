@@ -233,7 +233,7 @@ export function ListingStepper() {
           className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white placeholder-[#4a4d65] outline-none focus:border-cyan-400/50 transition-colors resize-none"
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">CATEGORY</label>
           <select
@@ -287,7 +287,7 @@ export function ListingStepper() {
 
   const renderHardwareGames = () => (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">HARDWARE</label>
           <select
@@ -313,7 +313,7 @@ export function ListingStepper() {
           </select>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">INTERNET SPEED</label>
           <select
@@ -371,7 +371,7 @@ export function ListingStepper() {
       <p className="text-[#a0aec0] text-sm">
         Upload high-quality photos of your gaming setup. The first photo will be used as the cover image.
       </p>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {form.photos.map((src, i) => (
           <div key={i} className="relative aspect-video rounded-lg overflow-hidden group border border-[#2a2d45]">
             <img src={src} alt={`Setup photo ${i + 1}`} className="w-full h-full object-cover" />
@@ -404,13 +404,13 @@ export function ListingStepper() {
     <div className="space-y-5">
       <div>
         <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-3">AVAILABLE DAYS</label>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {DAYS.map((day) => (
             <button
               key={day}
               onClick={() => toggleDay(day)}
               className={cn(
-                "w-12 h-10 rounded-lg text-[10px] font-bold tracking-widest border transition-all",
+                "w-10 h-10 md:w-12 md:h-10 rounded-lg text-[10px] font-bold tracking-widest border transition-all",
                 form.availableDays.includes(day)
                   ? "bg-cyan-500/20 border-cyan-400/50 text-cyan-400"
                   : "bg-[#1a1d2e] border-[#2a2d45] text-[#6b7280] hover:border-[#4a4d65]"
@@ -421,7 +421,7 @@ export function ListingStepper() {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">OPENING TIME</label>
           <input
@@ -441,7 +441,7 @@ export function ListingStepper() {
           />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">MIN BOOKING (HOURS)</label>
           <select
@@ -533,7 +533,7 @@ export function ListingStepper() {
         </label>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">TAX ID / PAN NUMBER</label>
           <input

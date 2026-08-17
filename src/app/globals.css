@@ -51,3 +51,8 @@
   background: #313441;
   border-radius: 3px;
 }
+
+/* Safe area padding for mobile bottom nav */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

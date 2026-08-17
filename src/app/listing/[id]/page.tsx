@@ -47,9 +47,9 @@ export default function ListingDetailPage() {
   if (loading) {
     return (
       <HomeLayout>
-        <div className="pt-24 px-8">
-          <div className="h-72 bg-[#161929] animate-pulse rounded-xl mb-8" />
-          <div className="grid grid-cols-4 gap-3 mb-8">
+        <div className="pt-24 px-4 md:px-8 pb-24 md:pb-8">
+          <div className="h-56 md:h-72 bg-[#161929] animate-pulse rounded-xl mb-8" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-24 bg-[#161929] animate-pulse rounded-xl" />
             ))}
@@ -62,7 +62,7 @@ export default function ListingDetailPage() {
   if (!listing) {
     return (
       <HomeLayout>
-        <div className="pt-24 px-8 text-center py-20">
+        <div className="pt-24 px-4 md:px-8 pb-24 md:pb-8 text-center py-20">
           <p className="text-[#6b7280] text-lg">Listing not found.</p>
         </div>
       </HomeLayout>
@@ -72,7 +72,7 @@ export default function ListingDetailPage() {
   return (
     <HomeLayout>
       {/* Hero image */}
-      <div className="relative h-72 w-full overflow-hidden pt-20">
+      <div className="relative h-56 md:h-72 w-full overflow-hidden pt-20">
         <Image
           src={listing.image || "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=1400&q=80"}
           alt={listing.title}
@@ -81,12 +81,12 @@ export default function ListingDetailPage() {
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0d0f1a] via-[#0d0f1a]/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 p-8">
+        <div className="absolute bottom-0 left-0 p-4 md:p-8">
           <Badge variant="purple" className="mb-3 text-[10px] tracking-widest">ELITE STATION</Badge>
           <div className="flex items-center gap-3 mb-2">
             <StarRating rating={listing.rating} size={14} />
           </div>
-          <h1 className="font-heading text-4xl font-extrabold text-white tracking-wide">
+          <h1 className="font-heading text-2xl md:text-4xl font-extrabold text-white tracking-wide">
             {listing.title.toUpperCase()}
           </h1>
           <p className="text-[#a0aec0] text-sm mt-2 max-w-lg">{listing.location}</p>
@@ -94,20 +94,20 @@ export default function ListingDetailPage() {
       </div>
 
       {/* Content + booking sidebar */}
-      <div className="flex gap-8 px-8 py-8">
+      <div className="flex flex-col lg:flex-row gap-6 md:gap-8 px-4 md:px-8 py-8 pb-24 md:pb-8">
         <div className="flex-1 min-w-0">
           {/* Specs */}
-          <div className="grid grid-cols-4 gap-3 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
             {[
               { icon: Monitor, label: "HARDWARE", value: listing.category.toUpperCase() },
               { icon: Users, label: "CAPACITY", value: "4 Players" },
               { icon: Utensils, label: "SNACKS", value: "Available" },
               { icon: Wifi, label: "NETWORK", value: listing.internet_speed || "500 Mbps" },
             ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="bg-[#161929] border border-[#1e2235] rounded-xl p-4 text-center">
+              <div key={label} className="bg-[#161929] border border-[#1e2235] rounded-xl p-3 md:p-4 text-center">
                 <Icon size={20} className="text-cyan-400 mx-auto mb-2" />
                 <p className="text-[10px] text-[#6b7280] tracking-widest mb-1">{label}</p>
-                <p className="text-sm font-semibold text-white">{value}</p>
+                <p className="text-xs md:text-sm font-semibold text-white">{value}</p>
               </div>
             ))}
           </div>
@@ -116,7 +116,7 @@ export default function ListingDetailPage() {
           {listing.featured_games && listing.featured_games.length > 0 && (
             <div className="mb-8">
               <h2 className="font-heading text-xl font-bold text-white mb-4 tracking-wide">LIBRARY HIGHLIGHTS</h2>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {listing.featured_games.slice(0, 4).map((game) => (
                   <div key={game} className="flex items-center gap-3 bg-[#161929] border border-[#1e2235] rounded-lg p-3">
                     <div className="w-10 h-10 rounded bg-gradient-to-br from-purple-900 to-blue-700 shrink-0" />
@@ -167,8 +167,8 @@ export default function ListingDetailPage() {
         </div>
 
         {/* Booking sidebar */}
-        <div className="w-72 shrink-0">
-          <div className="bg-[#161929] border border-[#1e2235] rounded-xl p-5 sticky top-20">
+        <div className="w-full lg:w-72 shrink-0">
+          <div className="bg-[#161929] border border-[#1e2235] rounded-xl p-5 lg:sticky lg:top-20">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <span className="text-3xl font-heading font-bold text-white">${listing.price_per_hour}</span>

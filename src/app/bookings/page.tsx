@@ -52,8 +52,8 @@ export default function BookingsPage() {
   return (
     <AuthGuard>
       <HomeLayout>
-        <div className="px-8 py-8 pt-24 max-w-5xl mx-auto">
-          <h1 className="font-heading text-4xl font-extrabold text-white tracking-wide mb-2">
+        <div className="px-4 md:px-8 py-8 pt-24 pb-24 md:pb-8 max-w-5xl mx-auto">
+          <h1 className="font-heading text-2xl md:text-4xl font-extrabold text-white tracking-wide mb-2">
             MY BOOKINGS
           </h1>
           <p className="text-[#a0aec0] text-sm mb-8">
@@ -86,9 +86,9 @@ export default function BookingsPage() {
               {bookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="bg-[#161929] border border-[#1e2235] rounded-xl p-5 flex gap-5"
+                  className="bg-[#161929] border border-[#1e2235] rounded-xl p-4 md:p-5 flex flex-col sm:flex-row gap-4 sm:gap-5"
                 >
-                  <div className="w-28 h-28 rounded-lg overflow-hidden shrink-0 bg-[#1a1d2e]">
+                  <div className="w-full sm:w-28 h-40 sm:h-28 rounded-lg overflow-hidden shrink-0 bg-[#1a1d2e]">
                     {booking.listings?.image ? (
                       <img src={booking.listings.image} alt="" className="w-full h-full object-cover" />
                     ) : (
@@ -112,7 +112,7 @@ export default function BookingsPage() {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-4 text-xs text-[#6b7280]">
+                    <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs text-[#6b7280]">
                       <span className="flex items-center gap-1">
                         <MapPin size={12} className="text-cyan-400" />
                         {booking.listings?.location || "—"}
@@ -128,7 +128,7 @@ export default function BookingsPage() {
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 sm:self-center">
                     <p className="text-lg font-heading font-bold text-white">${booking.total_price}</p>
                     <p className="text-[10px] text-[#6b7280] tracking-widest">{booking.hours}H SESSION</p>
                   </div>

@@ -92,45 +92,49 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
       {children}
 
       {/* ── Mobile bottom nav ── */}
-      <div className="fixed bottom-0 w-full md:hidden bg-[#171b27]/90 backdrop-blur-xl border-t border-white/10 z-50 px-6 py-3">
-        <div className="flex justify-between items-center">
+      <div className="fixed bottom-0 w-full md:hidden bg-[#171b27]/95 backdrop-blur-xl border-t border-white/10 z-50 safe-bottom">
+        <div className="flex justify-around items-center px-2 py-2">
           {!loading && !isLoggedIn && (
-            <Link href="/" className="flex flex-col items-center gap-1 text-[#00daf3]">
-              <span className="text-xs font-headline uppercase font-bold">Home</span>
+            <Link href="/" className="flex flex-col items-center gap-0.5 text-[#00daf3] min-w-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              <span className="text-[9px] font-headline uppercase font-bold">Home</span>
             </Link>
           )}
-          <Link href="/marketplace" className="flex flex-col items-center gap-1 text-slate-400">
-            <span className="text-xs font-headline uppercase">Explore</span>
+          <Link href="/marketplace" className="flex flex-col items-center gap-0.5 text-slate-400 min-w-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span className="text-[9px] font-headline uppercase">Explore</span>
           </Link>
           {!loading && !isLoggedIn && (
-            <Link href="/signup" className="flex flex-col items-center gap-1 text-slate-400">
-              <span className="text-xs font-headline uppercase">Host</span>
+            <Link href="/signup" className="flex flex-col items-center gap-0.5 text-slate-400 min-w-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M14 4h4a2 2 0 0 1 2 2v4"/></svg>
+              <span className="text-[9px] font-headline uppercase">Host</span>
             </Link>
           )}
           {!loading && isLoggedIn && role === "host" && (
-            <Link href="/dashboard" className="flex flex-col items-center gap-1 text-slate-400">
-              <span className="text-xs font-headline uppercase">Dashboard</span>
+            <Link href="/dashboard" className="flex flex-col items-center gap-0.5 text-slate-400 min-w-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+              <span className="text-[9px] font-headline uppercase">Dashboard</span>
             </Link>
           )}
-          <div className="bg-gradient-to-br from-[#b0c6ff] to-[#5203d5] p-3 rounded-full -mt-10 shadow-lg border-4 border-[#0f131e]">
-            <span className="text-[#002661] font-bold text-lg">+</span>
-          </div>
-          {!loading && (
-            isLoggedIn ? (
-              <>
-                <Link href="/bookings" className="flex flex-col items-center gap-1 text-slate-400">
-                  <span className="text-xs font-headline uppercase">Bookings</span>
-                </Link>
-                <Link href="/profile" className="flex flex-col items-center gap-1 text-slate-400">
-                  <span className="text-xs font-headline uppercase">Profile</span>
-                </Link>
-              </>
-            ) : (
-              <Link href="/login" className="flex flex-col items-center gap-1 text-cyan-400">
-                <span className="text-xs font-headline uppercase font-bold">Login</span>
-              </Link>
-            )
+          {!loading && isLoggedIn && (
+            <Link href="/bookings" className="flex flex-col items-center gap-0.5 text-slate-400 min-w-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+              <span className="text-[9px] font-headline uppercase">Bookings</span>
+            </Link>
           )}
+          {!loading && isLoggedIn ? (
+            <Link href="/profile" className="flex flex-col items-center gap-0.5 text-slate-400 min-w-0">
+              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-600 to-cyan-500 flex items-center justify-center text-[8px] font-bold text-white">
+                {user?.user_metadata?.full_name?.charAt(0)?.toUpperCase() || "U"}
+              </div>
+              <span className="text-[9px] font-headline uppercase">Profile</span>
+            </Link>
+          ) : !loading && !isLoggedIn ? (
+            <Link href="/login" className="flex flex-col items-center gap-0.5 text-cyan-400 min-w-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+              <span className="text-[9px] font-headline uppercase font-bold">Login</span>
+            </Link>
+          ) : null}
         </div>
       </div>
     </div>

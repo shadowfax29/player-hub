@@ -45,7 +45,7 @@ export default function HomePage() {
 
             {/* Headline */}
             <div className="space-y-4">
-              <h1 className="text-6xl md:text-8xl font-black font-headline uppercase leading-none tracking-tighter">
+              <h1 className="text-5xl md:text-8xl font-black font-headline uppercase leading-none tracking-tighter">
                 Find.<br />
                 {/* Gradient "Book." matching from-primary to-tertiary */}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#b0c6ff] to-[#00daf3]">

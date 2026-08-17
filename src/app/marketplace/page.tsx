@@ -53,8 +53,8 @@ export default function MarketplacePage() {
 
   return (
     <HomeLayout>
-      <div className="px-8 py-8 pt-24">
-        <h1 className="font-heading text-4xl font-extrabold text-white tracking-wide mb-2">
+      <div className="px-4 md:px-8 py-8 pt-24 pb-24 md:pb-8">
+        <h1 className="font-heading text-2xl md:text-4xl font-extrabold text-white tracking-wide mb-2">
           EXPLORE MARKETPLACE
         </h1>
         <p className="text-[#a0aec0] text-sm mb-8 max-w-xl">
@@ -62,8 +62,8 @@ export default function MarketplacePage() {
         </p>
 
         {/* Search bar */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="flex items-center gap-3 bg-[#161929] border border-[#1e2235] rounded-lg px-4 py-3 flex-1 max-w-xs focus-within:border-cyan-400/50 transition-colors">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 bg-[#161929] border border-[#1e2235] rounded-lg px-4 py-3 flex-1 sm:max-w-xs focus-within:border-cyan-400/50 transition-colors">
             <MapPin size={16} className="text-cyan-400 shrink-0" />
             <input
               type="text"
@@ -73,7 +73,7 @@ export default function MarketplacePage() {
                 if (searchApplied) setSearchApplied(true);
               }}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="Search by location (e.g. Tokyo, London)"
+              placeholder="Search by location"
               className="bg-transparent text-sm text-white placeholder-[#6b7280] outline-none w-full"
             />
             {locationQuery && (
@@ -83,7 +83,7 @@ export default function MarketplacePage() {
             )}
           </div>
 
-          <div className="flex items-center gap-3 bg-[#161929] border border-[#1e2235] rounded-lg px-4 py-3 flex-1 max-w-xs focus-within:border-cyan-400/50 transition-colors">
+          <div className="flex items-center gap-3 bg-[#161929] border border-[#1e2235] rounded-lg px-4 py-3 flex-1 sm:max-w-xs focus-within:border-cyan-400/50 transition-colors">
             <Calendar size={16} className="text-cyan-400 shrink-0" />
             <input
               type="date"
@@ -133,13 +133,13 @@ export default function MarketplacePage() {
 
         {/* Listings grid */}
         {loading ? (
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-[#161929] border border-[#1e2235] rounded-xl h-72 animate-pulse" />
             ))}
           </div>
         ) : listings.length > 0 ? (
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {listings.map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
