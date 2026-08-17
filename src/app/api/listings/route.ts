@@ -17,15 +17,22 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get("category");
   const location = searchParams.get("location");
+  const hostId = searchParams.get("host_id");
   const limit = parseInt(searchParams.get("limit") || "50");
   const offset = parseInt(searchParams.get("offset") || "0");
 
   let query = supabase
     .from("listings")
     .select("*")
-    .eq("status", "active")
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
+
+  // If fetching host's own listings, include all statuses
+  if (hostId) {
+    query = query.eq("host_id", hostId);
+  } else {
+    query = query.eq("status", "active");
+  }
 
   if (category && category !== "all") {
     query = query.eq("category", category);
