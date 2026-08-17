@@ -45,7 +45,7 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
               PlayHub
             </Link>
             <div className="hidden md:flex gap-6 font-headline uppercase tracking-wider text-sm">
-              {topLinks.map(({ label, href }) => {
+              {!loading && topLinks.map(({ label, href }) => {
                 const isActive = pathname === href;
                 return (
                   <Link
