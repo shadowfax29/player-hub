@@ -3,7 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 
 export const metadata: Metadata = {
-  title: "PlayHub — Find. Book. Play.",
+  title: "PlayConsole — Find. Book. Play.",
   description: "Discover and book premium gaming setups, high-end PC lounges, and immersive console rooms across the global network.",
 };
 

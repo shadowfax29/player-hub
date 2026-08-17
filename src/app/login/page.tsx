@@ -44,7 +44,7 @@ export default function LoginPage() {
         {/* Logo */}
         <Link href="/" className="block text-center mb-8">
           <span className="text-3xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-[#b0c6ff] to-[#5203d5] font-headline">
-            PlayHub
+            PlayConsole
           </span>
         </Link>
 

@@ -16,7 +16,7 @@ interface TopnavProps {
   showSearch?: boolean;
 }
 
-// Top navigation bar — PlayHub logo, nav links, search, and user icons
+// Top navigation bar — PlayConsole logo, nav links, search, and user icons
 export function Topnav({ showSearch = false }: TopnavProps) {
   const pathname = usePathname();
 

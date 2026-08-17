@@ -1,4 +1,4 @@
-// Core data types used across the PlayHub application
+// Core data types used across the PlayConsole application
 
 export interface Listing {
   id: string;

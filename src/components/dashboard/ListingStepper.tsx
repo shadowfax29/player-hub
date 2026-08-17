@@ -591,7 +591,7 @@ export function ListingStepper() {
           className="mt-1 w-4 h-4 accent-cyan-400"
         />
         <span className="text-xs text-[#a0aec0] leading-relaxed">
-          I confirm that all information provided is accurate. I agree to PlayHub&apos;s Host Terms of Service,
+          I confirm that all information provided is accurate. I agree to PlayConsole&apos;s Host Terms of Service,
           Cancellation Policy, and understand that listings are subject to review before going live.
         </span>
       </label>

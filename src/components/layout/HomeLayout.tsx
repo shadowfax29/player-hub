@@ -41,7 +41,7 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
           {/* Left: logo + nav links */}
           <div className="flex items-center gap-8">
             <Link href="/" className="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-[#b0c6ff] to-[#5203d5] font-headline">
-              PlayHub
+              PlayConsole
             </Link>
             <div className="hidden md:flex gap-6 font-headline uppercase tracking-wider text-sm">
               {!loading && topLinks.map(({ label, href }) => {
