@@ -58,25 +58,55 @@ export default function SignupPage() {
       role,
       id_type: idType,
     });
-    setLoading(false);
 
     if (result.error) {
+      setLoading(false);
       setError(result.error);
-    } else {
-      const supabase = getSupabase();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("profiles").insert({
-          id: user.id,
-          full_name: fullName,
-          email: email,
-          role: role,
-          id_type: idType,
-          verified: false,
-        });
-      }
-      router.push("/login");
+      return;
     }
+
+    const supabase = getSupabase();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setLoading(false);
+      setError("Account created but could not verify user. Please log in.");
+      return;
+    }
+
+    // Upload government ID to Supabase Storage
+    let idDocUrl = "";
+    try {
+      const ext = idFile.name.split(".").pop() || "jpg";
+      const filePath = `${user.id}/government-id.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("government-ids")
+        .upload(filePath, idFile, { upsert: true });
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+      } else {
+        const { data: urlData } = supabase.storage
+          .from("government-ids")
+          .getPublicUrl(filePath);
+        idDocUrl = urlData.publicUrl;
+      }
+    } catch (err) {
+      console.error("File upload failed:", err);
+    }
+
+    // Insert profile with document URL
+    await supabase.from("profiles").insert({
+      id: user.id,
+      full_name: fullName,
+      email: email,
+      role: role,
+      id_type: idType,
+      id_document_url: idDocUrl,
+      verified: false,
+    });
+
+    setLoading(false);
+    router.push("/login");
   };
 
   return (
