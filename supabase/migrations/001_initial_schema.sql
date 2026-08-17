@@ -62,11 +62,12 @@ CREATE TABLE IF NOT EXISTS reviews (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 4. HOST PROFILES TABLE (extends auth.users)
-CREATE TABLE IF NOT EXISTS host_profiles (
+-- 4. PROFILES TABLE (hosts and guests)
+CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT,
   email TEXT,
+  role TEXT DEFAULT 'guest' CHECK (role IN ('host', 'guest')),
   id_type TEXT,
   id_document_url TEXT,
   address_proof_url TEXT,
@@ -89,7 +90,7 @@ CREATE INDEX IF NOT EXISTS idx_reviews_listing ON reviews(listing_id);
 ALTER TABLE listings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
-ALTER TABLE host_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
 -- Listings: public read, host write
 CREATE POLICY "listings_select_public" ON listings FOR SELECT USING (true);
@@ -107,10 +108,10 @@ CREATE POLICY "reviews_select_public" ON reviews FOR SELECT USING (true);
 CREATE POLICY "reviews_insert_auth" ON reviews FOR INSERT WITH CHECK (auth.uid() = author_id);
 CREATE POLICY "reviews_delete_own" ON reviews FOR DELETE USING (auth.uid() = author_id);
 
--- Host profiles: own read/write
-CREATE POLICY "host_profiles_select_own" ON host_profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "host_profiles_insert_own" ON host_profiles FOR INSERT WITH CHECK (auth.uid() = id);
-CREATE POLICY "host_profiles_update_own" ON host_profiles FOR UPDATE USING (auth.uid() = id);
+-- Profiles: own read/write
+CREATE POLICY "profiles_select_own" ON profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- SEED: Insert mock listings (assign to first host user or use a placeholder)
 -- These will appear in the marketplace

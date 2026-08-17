@@ -63,18 +63,17 @@ export default function SignupPage() {
     if (result.error) {
       setError(result.error);
     } else {
-      if (role === "host") {
-        const supabase = getSupabase();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase.from("host_profiles").insert({
-            id: user.id,
-            full_name: fullName,
-            email: email,
-            id_type: idType,
-            verified: false,
-          });
-        }
+      const supabase = getSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("profiles").insert({
+          id: user.id,
+          full_name: fullName,
+          email: email,
+          role: role,
+          id_type: idType,
+          verified: false,
+        });
       }
       router.push("/login");
     }
