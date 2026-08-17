@@ -21,7 +21,6 @@ const guestLinks = [
 
 const authLinks = [
   { label: "My Bookings", href: "/bookings" },
-  { label: "Profile", href: "/profile" },
 ];
 
 // Home page layout — full-width, no sidebar.
@@ -70,6 +69,9 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
             {!loading && (
               isLoggedIn ? (
                 <div className="flex items-center gap-3">
+                  <Link href="/profile" className="text-[10px] text-[#6b7280] hover:text-white tracking-widest transition-colors font-headline uppercase">
+                    Profile
+                  </Link>
                   <Link href="/profile" className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-600 to-cyan-500 flex items-center justify-center text-xs font-bold text-white hover:ring-2 hover:ring-cyan-400/50 transition-all">
                     {user?.user_metadata?.full_name?.charAt(0)?.toUpperCase() || "U"}
                   </Link>
