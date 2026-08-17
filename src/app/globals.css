@@ -1,0 +1,53 @@
+/* Import Space Grotesk for headings and Inter for body — matching the HTML design */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+@import "tailwindcss";
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: #0f131e;
+    color: #dfe2f2;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+  }
+}
+
+/* Glass panel effect from the HTML */
+.glass-panel {
+  background: rgba(49, 52, 65, 0.4);
+  backdrop-filter: blur(20px);
+}
+
+/* Hero glow radial gradient */
+.hero-glow {
+  background: radial-gradient(circle at 50% 50%, rgba(82, 3, 213, 0.15) 0%, transparent 70%);
+}
+
+/* Cyan flare drop shadow */
+.cyan-flare {
+  filter: drop-shadow(0 0 10px #00daf3);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #171b27;
+}
+::-webkit-scrollbar-thumb {
+  background: #313441;
+  border-radius: 3px;
+}
