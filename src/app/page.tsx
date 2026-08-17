@@ -1,11 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { HomeLayout } from "@/components/layout/HomeLayout";
+import { useAuth } from "@/lib/auth-context";
 import consoleImg from "../media/console.png";
 
-// Home page — direct Next.js conversion of the provided HTML design.
-// Preserves all colors, fonts, effects, and layout from the source.
 export default function HomePage() {
+  const { user, isLoggedIn } = useAuth();
+  const role = user?.user_metadata?.role || user?.app_metadata?.role;
   return (
     <HomeLayout>
 
@@ -58,10 +61,10 @@ export default function HomePage() {
             {/* CTA buttons */}
             <div className="flex flex-wrap gap-4 pt-4">
               <Link href="/marketplace" className="px-8 py-4 bg-gradient-to-br from-[#b0c6ff] to-[#5203d5] text-[#002661] font-headline font-bold uppercase tracking-wider rounded-xl shadow-[0_0_30px_rgba(176,198,255,0.3)] hover:scale-105 active:scale-95 transition-all duration-300">
-                Find a PlayStation
+                {isLoggedIn && role === "host" ? "EXPLORE" : "Find a PlayStation"}
               </Link>
-              <Link href="/dashboard" className="px-8 py-4 border border-[#424655]/30 text-[#dfe2f2] font-headline font-bold uppercase tracking-wider rounded-xl hover:bg-white/5 hover:border-[#b0c6ff] transition-all duration-300 active:scale-95">
-                List Your Setup
+              <Link href={isLoggedIn && role === "host" ? "/dashboard" : "/signup"} className="px-8 py-4 border border-[#424655]/30 text-[#dfe2f2] font-headline font-bold uppercase tracking-wider rounded-xl hover:bg-white/5 hover:border-[#b0c6ff] transition-all duration-300 active:scale-95">
+                {isLoggedIn && role === "host" ? "GO TO DASHBOARD" : "BECOME A HOST"}
               </Link>
             </div>
 
