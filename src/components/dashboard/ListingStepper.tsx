@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronRight, ChevronLeft, Plus, X, Upload, MapPin, Gamepad2, Camera, Clock, Shield } from "lucide-react";
+import { Check, ChevronRight, ChevronLeft, Plus, X, Upload, MapPin, Gamepad2, Camera, Clock, Shield, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
+import { getSupabase } from "@/lib/supabase";
 
 const STEPS = [
   { label: "SETUP INFO", icon: Gamepad2 },
@@ -102,6 +104,9 @@ const ID_TYPES = [
 export function ListingStepper() {
   const [currentStep, setCurrentStep] = useState(0);
   const [form, setForm] = useState<FormData>(defaultForm);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const { user } = useAuth();
 
   const updateField = (field: keyof FormData, value: unknown) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -140,6 +145,48 @@ export function ListingStepper() {
 
   const removePhoto = (index: number) => {
     updateField("photos", form.photos.filter((_, i) => i !== index));
+  };
+
+  const submitListing = async () => {
+    if (!form.agreeTerms || !user) return;
+    setSubmitting(true);
+
+    try {
+      const supabase = getSupabase();
+      const { error } = await supabase.from("listings").insert({
+        host_id: user.id,
+        title: form.setupName,
+        description: form.description,
+        category: form.category,
+        location: form.location,
+        address: form.address,
+        price_per_hour: Number(form.hourlyRate),
+        image: form.photos[0] || "",
+        photos: form.photos,
+        featured_games: form.games,
+        hardware: form.hardware,
+        console_model: form.consoleModel,
+        tv_size: form.tvSize,
+        internet_speed: form.internetSpeed,
+        available_days: form.availableDays,
+        open_time: form.openTime,
+        close_time: form.closeTime,
+        min_booking_hours: Number(form.minBooking),
+        max_booking_hours: Number(form.maxBooking),
+        id_type: form.idType,
+        tax_id: form.taxId,
+        bank_account: form.bankAccount,
+        status: "pending",
+      });
+
+      if (error) throw error;
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Submit failed:", err);
+      alert("Failed to submit listing. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const next = () => setCurrentStep((s) => Math.min(s + 1, STEPS.length - 1));
@@ -551,6 +598,26 @@ export function ListingStepper() {
     </div>
   );
 
+  if (submitted) {
+    return (
+      <div className="bg-[#161929] border border-[#1e2235] rounded-xl p-12 text-center">
+        <div className="w-16 h-16 rounded-full bg-cyan-500/20 border-2 border-cyan-400 flex items-center justify-center mx-auto mb-6">
+          <Check size={28} className="text-cyan-400" />
+        </div>
+        <h2 className="font-heading text-2xl font-bold text-white tracking-widest mb-3">LISTING SUBMITTED!</h2>
+        <p className="text-[#a0aec0] text-sm max-w-md mx-auto mb-2">
+          Your setup <span className="text-white font-semibold">{form.setupName || "Untitled"}</span> has been submitted for review.
+        </p>
+        <p className="text-[#6b7280] text-xs mb-8">
+          Our team will review your listing within 24-48 hours. You will receive a notification once it goes live.
+        </p>
+        <Button variant="primary" size="md" onClick={() => { setSubmitted(false); setForm(defaultForm); setCurrentStep(0); }} className="tracking-widest">
+          CREATE ANOTHER LISTING
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#161929] border border-[#1e2235] rounded-xl overflow-hidden">
       {/* Step progress bar */}
@@ -616,10 +683,17 @@ export function ListingStepper() {
           <Button
             variant="primary"
             size="md"
-            disabled={!form.agreeTerms}
-            className={cn("tracking-widest text-xs", !form.agreeTerms && "opacity-50 cursor-not-allowed")}
+            disabled={!form.agreeTerms || submitting}
+            onClick={submitListing}
+            className={cn("tracking-widest text-xs gap-2", (!form.agreeTerms || submitting) && "opacity-50 cursor-not-allowed")}
           >
-            SUBMIT LISTING
+            {submitting ? (
+              <>
+                <Loader2 size={14} className="animate-spin" /> SUBMITTING...
+              </>
+            ) : (
+              "SUBMIT LISTING"
+            )}
           </Button>
         )}
       </div>
