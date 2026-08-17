@@ -8,7 +8,18 @@ import { useAuth } from "@/lib/auth-context";
 const baseLinks = [
   { label: "Home", href: "/" },
   { label: "Explore", href: "/marketplace" },
-  { label: "Become a Host", href: "/dashboard" },
+];
+
+const hostLinks = [
+  { label: "Home", href: "/" },
+  { label: "Explore", href: "/marketplace" },
+  { label: "Dashboard", href: "/dashboard" },
+];
+
+const guestLinks = [
+  { label: "Home", href: "/" },
+  { label: "Explore", href: "/marketplace" },
+  { label: "Become a Host", href: "/signup" },
 ];
 
 const authLinks = [
@@ -22,7 +33,9 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { isLoggedIn, loading, user, signOut } = useAuth();
-  const topLinks = [...baseLinks, ...(isLoggedIn ? authLinks : [])];
+  const role = user?.user_metadata?.role;
+  const navLinks = role === "host" ? hostLinks : isLoggedIn ? guestLinks : baseLinks;
+  const topLinks = [...navLinks, ...(isLoggedIn ? authLinks : [])];
 
   return (
     <div className="min-h-screen bg-[#0f131e]">
