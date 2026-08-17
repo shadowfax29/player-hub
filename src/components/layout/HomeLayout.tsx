@@ -6,18 +6,15 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 
 const baseLinks = [
-  { label: "Home", href: "/" },
   { label: "Explore", href: "/marketplace" },
 ];
 
 const hostLinks = [
-  { label: "Home", href: "/" },
   { label: "Explore", href: "/marketplace" },
   { label: "Dashboard", href: "/dashboard" },
 ];
 
 const guestLinks = [
-  { label: "Home", href: "/" },
   { label: "Explore", href: "/marketplace" },
   { label: "Become a Host", href: "/signup" },
 ];
@@ -104,12 +101,20 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
       {/* ── Mobile bottom nav ── */}
       <div className="fixed bottom-0 w-full md:hidden bg-[#171b27]/90 backdrop-blur-xl border-t border-white/10 z-50 px-6 py-3">
         <div className="flex justify-between items-center">
-          <Link href="/" className="flex flex-col items-center gap-1 text-[#00daf3]">
-            <span className="text-xs font-headline uppercase font-bold">Home</span>
-          </Link>
           <Link href="/marketplace" className="flex flex-col items-center gap-1 text-slate-400">
             <span className="text-xs font-headline uppercase">Explore</span>
           </Link>
+          {!loading && (
+            role === "host" ? (
+              <Link href="/dashboard" className="flex flex-col items-center gap-1 text-slate-400">
+                <span className="text-xs font-headline uppercase">Dashboard</span>
+              </Link>
+            ) : isLoggedIn ? (
+              <Link href="/signup" className="flex flex-col items-center gap-1 text-slate-400">
+                <span className="text-xs font-headline uppercase">Host</span>
+              </Link>
+            ) : null
+          )}
           <div className="bg-gradient-to-br from-[#b0c6ff] to-[#5203d5] p-3 rounded-full -mt-10 shadow-lg border-4 border-[#0f131e]">
             <span className="text-[#002661] font-bold text-lg">+</span>
           </div>
