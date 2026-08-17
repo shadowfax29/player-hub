@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Upload, Gamepad2, Home, Shield } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { getSupabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +63,19 @@ export default function SignupPage() {
     if (result.error) {
       setError(result.error);
     } else {
+      if (role === "host") {
+        const supabase = getSupabase();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from("host_profiles").insert({
+            id: user.id,
+            full_name: fullName,
+            email: email,
+            id_type: idType,
+            verified: false,
+          });
+        }
+      }
       router.push("/login");
     }
   };
