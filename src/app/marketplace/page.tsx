@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapPin, Calendar, Search, X } from "lucide-react";
 import { HomeLayout } from "@/components/layout/HomeLayout";
 import { ListingCard } from "@/components/marketplace/ListingCard";
 import { Button } from "@/components/ui/Button";
-import { listings } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import type { Listing } from "@/lib/types";
 
 const categories = [
   { label: "ALL EXPERIENCES", value: "all" },
@@ -23,23 +23,21 @@ export default function MarketplacePage() {
   const [locationQuery, setLocationQuery] = useState("");
   const [date, setDate] = useState("");
   const [searchApplied, setSearchApplied] = useState(false);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredListings = listings.filter((listing) => {
-    // Category filter
-    if (activeCategory !== "all" && listing.category !== activeCategory) return false;
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (activeCategory !== "all") params.set("category", activeCategory);
+    if (searchApplied && locationQuery.trim()) params.set("location", locationQuery.trim());
 
-    // Location filter — case-insensitive partial match
-    if (searchApplied && locationQuery.trim()) {
-      const q = locationQuery.toLowerCase();
-      if (!listing.location.toLowerCase().includes(q)) return false;
-    }
-
-    // Date filter — for mock data, listings are always available.
-    // If a date is picked and search is applied, we show all (simulating availability).
-    // In a real app this would query the backend for available dates.
-
-    return true;
-  });
+    setLoading(true);
+    fetch(`/api/listings?${params.toString()}`)
+      .then((res) => res.json())
+      .then((data) => setListings(data.listings || []))
+      .catch(() => setListings([]))
+      .finally(() => setLoading(false));
+  }, [activeCategory, locationQuery, searchApplied]);
 
   const handleSearch = () => {
     setSearchApplied(true);
@@ -56,7 +54,6 @@ export default function MarketplacePage() {
   return (
     <HomeLayout>
       <div className="px-8 py-8 pt-24">
-        {/* Page header */}
         <h1 className="font-heading text-4xl font-extrabold text-white tracking-wide mb-2">
           EXPLORE MARKETPLACE
         </h1>
@@ -64,9 +61,8 @@ export default function MarketplacePage() {
           Discover and book premium gaming setups, high-end PC lounges, and immersive console rooms across the global network.
         </p>
 
-        {/* Search bar row */}
+        {/* Search bar */}
         <div className="flex items-center gap-3 mb-6">
-          {/* Location input */}
           <div className="flex items-center gap-3 bg-[#161929] border border-[#1e2235] rounded-lg px-4 py-3 flex-1 max-w-xs focus-within:border-cyan-400/50 transition-colors">
             <MapPin size={16} className="text-cyan-400 shrink-0" />
             <input
@@ -87,7 +83,6 @@ export default function MarketplacePage() {
             )}
           </div>
 
-          {/* Date picker */}
           <div className="flex items-center gap-3 bg-[#161929] border border-[#1e2235] rounded-lg px-4 py-3 flex-1 max-w-xs focus-within:border-cyan-400/50 transition-colors">
             <Calendar size={16} className="text-cyan-400 shrink-0" />
             <input
@@ -101,29 +96,24 @@ export default function MarketplacePage() {
             />
           </div>
 
-          {/* Search button */}
           <Button variant="primary" size="md" className="px-8 tracking-widest gap-2" onClick={handleSearch}>
             <Search size={14} />
             EXPLORE
           </Button>
         </div>
 
-        {/* Active search indicator + clear */}
         {hasActiveSearch && (
           <div className="flex items-center gap-3 mb-4">
             <span className="text-xs text-[#6b7280] tracking-widest">
-              {filteredListings.length} RESULT{filteredListings.length !== 1 ? "S" : ""} FOUND
+              {listings.length} RESULT{listings.length !== 1 ? "S" : ""} FOUND
             </span>
-            <button
-              onClick={handleClearSearch}
-              className="text-xs text-cyan-400 hover:text-cyan-300 tracking-widest transition-colors"
-            >
+            <button onClick={handleClearSearch} className="text-xs text-cyan-400 hover:text-cyan-300 tracking-widest transition-colors">
               CLEAR SEARCH
             </button>
           </div>
         )}
 
-        {/* Category filter pills */}
+        {/* Category pills */}
         <div className="flex items-center gap-2 mb-8 flex-wrap">
           {categories.map((cat) => (
             <button
@@ -141,19 +131,25 @@ export default function MarketplacePage() {
           ))}
         </div>
 
-        {/* Listings grid — 3 columns */}
-        <div className="grid grid-cols-3 gap-6">
-          {filteredListings.length > 0 ? (
-            filteredListings.map((listing) => (
+        {/* Listings grid */}
+        {loading ? (
+          <div className="grid grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-[#161929] border border-[#1e2235] rounded-xl h-72 animate-pulse" />
+            ))}
+          </div>
+        ) : listings.length > 0 ? (
+          <div className="grid grid-cols-3 gap-6">
+            {listings.map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
-            ))
-          ) : (
-            <div className="col-span-3 text-center py-16">
-              <p className="text-[#6b7280] text-lg mb-2">No listings found.</p>
-              <p className="text-[#4a4d65] text-sm">Try adjusting your search or filters.</p>
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <p className="text-[#6b7280] text-lg mb-2">No listings found.</p>
+            <p className="text-[#4a4d65] text-sm">Try adjusting your search or filters.</p>
+          </div>
+        )}
       </div>
     </HomeLayout>
   );
