@@ -57,9 +57,9 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <span className="text-sm text-[#4a4d65] cursor-not-allowed">
+                <Link href="/cancellation-refund" className="text-sm text-[#a0aec0] hover:text-white transition-colors">
                   Cancellation &amp; Refund Policy
-                </span>
+                </Link>
               </li>
             </ul>
           </div>
