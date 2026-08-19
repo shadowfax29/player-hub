@@ -52,6 +52,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/disclaimer" className="text-sm text-[#a0aec0] hover:text-white transition-colors">
+                  Disclaimer
+                </Link>
+              </li>
+              <li>
                 <span className="text-sm text-[#4a4d65] cursor-not-allowed">
                   Cancellation &amp; Refund Policy
                 </span>
