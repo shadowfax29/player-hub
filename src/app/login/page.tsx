@@ -7,6 +7,9 @@ import { useAuth } from "@/lib/auth-context";
 import { getSupabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 
+const ADMIN_EMAIL = "admin@playconsole.com";
+const ADMIN_PASSWORD = "Admin@123";
+
 export default function LoginPage() {
   const router = useRouter();
   const { signIn } = useAuth();
@@ -33,6 +36,19 @@ export default function LoginPage() {
         return;
       }
 
+      // Check if this is the default admin email — auto-setup admin role
+      if (user.email === ADMIN_EMAIL) {
+        await supabase.from("profiles").upsert({
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || "Admin",
+          role: "admin",
+          verified: true,
+        }, { onConflict: "id" });
+        router.push("/admin");
+        return;
+      }
+
       // Check if profile exists and is verified
       const { data: profile } = await supabase
         .from("profiles")
@@ -41,7 +57,6 @@ export default function LoginPage() {
         .single();
 
       if (profile && !profile.verified) {
-        // Sign out the user since they're not verified
         await supabase.auth.signOut();
         setError("Your account is pending verification. Please wait for your identity to be verified before logging in.");
         return;
@@ -50,6 +65,45 @@ export default function LoginPage() {
       const role = user.user_metadata?.role;
       router.push(role === "host" ? "/dashboard" : "/marketplace");
     }
+  };
+
+  const handleAdminLogin = async () => {
+    setError("");
+    setLoading(true);
+
+    // First try to sign up the admin if they don't exist
+    const supabase = getSupabase();
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: ADMIN_EMAIL,
+      password: ADMIN_PASSWORD,
+      options: { data: { full_name: "Admin", role: "admin" } },
+    });
+
+    // Ignore "already registered" errors — we'll just sign in
+    if (signUpError && !signUpError.message.includes("already")) {
+      // If signup fails for other reasons, try sign in anyway
+    }
+
+    const result = await signIn(ADMIN_EMAIL, ADMIN_PASSWORD);
+    setLoading(false);
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from("profiles").upsert({
+        id: user.id,
+        email: ADMIN_EMAIL,
+        full_name: "Admin",
+        role: "admin",
+        verified: true,
+      }, { onConflict: "id" });
+    }
+
+    router.push("/admin");
   };
 
   return (
@@ -117,6 +171,21 @@ export default function LoginPage() {
               {loading ? "LOGGING IN..." : "LOG IN"}
             </Button>
           </form>
+
+          {/* Admin Quick Login */}
+          <div className="mt-6 pt-6 border-t border-[#1e2235]">
+            <button
+              onClick={handleAdminLogin}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-purple-600/10 border border-purple-500/20 text-purple-400 hover:bg-purple-600/20 hover:text-purple-300 transition-colors text-sm font-bold tracking-wide disabled:opacity-50"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+              {loading ? "SETTING UP ADMIN..." : "ADMIN LOGIN"}
+            </button>
+            <p className="text-[10px] text-[#4a4d65] text-center mt-2">Default: admin@playconsole.com</p>
+          </div>
 
           <p className="text-center text-sm text-[#6b7280] mt-6">
             Don&apos;t have an account?{" "}
