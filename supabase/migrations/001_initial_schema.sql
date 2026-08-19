@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   role TEXT DEFAULT 'guest' CHECK (role IN ('host', 'guest')),
   id_type TEXT,
   id_document_url TEXT,
+  selfie_url TEXT,
   address_proof_url TEXT,
   tax_id TEXT,
   bank_account TEXT,

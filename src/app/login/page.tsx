@@ -26,8 +26,28 @@ export default function LoginPage() {
     if (result.error) {
       setError(result.error);
     } else {
-      const { data: { user } } = await getSupabase().auth.getUser();
-      const role = user?.user_metadata?.role;
+      const supabase = getSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setError("Could not verify account. Please try again.");
+        return;
+      }
+
+      // Check if profile exists and is verified
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("verified")
+        .eq("id", user.id)
+        .single();
+
+      if (profile && !profile.verified) {
+        // Sign out the user since they're not verified
+        await supabase.auth.signOut();
+        setError("Your account is pending verification. Please wait for your identity to be verified before logging in.");
+        return;
+      }
+
+      const role = user.user_metadata?.role;
       router.push(role === "host" ? "/dashboard" : "/marketplace");
     }
   };
