@@ -73,16 +73,6 @@ export function Footer() {
                   support@playconsole.com
                 </a>
               </li>
-              <li>
-                <Link href="/terms" className="text-sm text-[#a0aec0] hover:text-white transition-colors">
-                  Help Centre
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-sm text-[#a0aec0] hover:text-white transition-colors">
-                  Host Guidelines
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
