@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
+import { Footer } from "./Footer";
 
 const baseLinks = [
   { label: "Home", href: "/" },
@@ -90,6 +91,9 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
       </nav>
 
       {children}
+
+      {/* Footer */}
+      <Footer />
 
       {/* ── Mobile bottom nav ── */}
       <div className="fixed bottom-0 w-full md:hidden bg-[#171b27]/95 backdrop-blur-xl border-t border-white/10 z-50 safe-bottom">
