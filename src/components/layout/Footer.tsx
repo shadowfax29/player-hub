@@ -47,9 +47,9 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <span className="text-sm text-[#4a4d65] cursor-not-allowed">
+                <Link href="/privacy" className="text-sm text-[#a0aec0] hover:text-white transition-colors">
                   Privacy Policy
-                </span>
+                </Link>
               </li>
               <li>
                 <span className="text-sm text-[#4a4d65] cursor-not-allowed">
