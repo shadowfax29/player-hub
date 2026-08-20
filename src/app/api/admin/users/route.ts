@@ -12,8 +12,7 @@ async function requireAdmin(request: NextRequest) {
   const token = auth.slice(7);
   const { data: { user }, error } = await supabase.auth.getUser(token);
   if (error || !user) return { error: "Unauthorized", status: 401 };
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (profile?.role !== "admin") return { error: "Forbidden", status: 403 };
+  if (user.user_metadata?.role !== "admin") return { error: "Forbidden", status: 403 };
   return { user };
 }
 
