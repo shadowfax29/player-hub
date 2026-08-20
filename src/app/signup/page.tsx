@@ -3,10 +3,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Upload, Gamepad2, Home, Shield, Camera, CheckCircle2, XCircle, Loader2, RotateCcw } from "lucide-react";
+import { Upload, Gamepad2, Home, Shield, Camera, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { getSupabase } from "@/lib/supabase";
-import { verifyFace } from "@/lib/face-verify";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -37,8 +36,6 @@ export default function SignupPage() {
 
   // Verification state
   const [step, setStep] = useState<Step>("details");
-  const [verifying, setVerifying] = useState(false);
-  const [verifyResult, setVerifyResult] = useState<{ match: boolean; score: number; message: string } | null>(null);
 
   // General state
   const [error, setError] = useState("");
@@ -118,26 +115,8 @@ export default function SignupPage() {
   const retakeSelfie = () => {
     setSelfieBlob(null);
     setSelfiePreview(null);
-    setVerifyResult(null);
     startCamera();
   };
-
-  const runVerification = async () => {
-    if (!idFile || !selfieBlob) return;
-    setVerifying(true);
-    setVerifyResult(null);
-
-    const result = await verifyFace(selfieBlob, idFile);
-    setVerifyResult(result);
-    setVerifying(false);
-  };
-
-  // Auto-verify when selfie is captured
-  useEffect(() => {
-    if (selfieBlob && idFile && !verifyResult && !verifying) {
-      runVerification();
-    }
-  }, [selfieBlob]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,8 +145,8 @@ export default function SignupPage() {
     }
 
     if (step === "verify") {
-      if (!verifyResult?.match) {
-        setError("Face verification failed. Please retake your selfie.");
+      if (!selfieBlob) {
+        setError("Please take a selfie to continue.");
         return;
       }
     }
@@ -241,7 +220,7 @@ export default function SignupPage() {
       id_type: idType,
       id_document_url: idDocUrl,
       selfie_url: selfieUrl,
-      verified: verifyResult?.match ?? false,
+      verified: false,
     });
 
     setLoading(false);
@@ -462,35 +441,6 @@ export default function SignupPage() {
                   )}
                 </div>
 
-                {/* Verification result */}
-                {verifying && (
-                  <div className="flex items-center gap-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3">
-                    <Loader2 size={16} className="text-cyan-400 animate-spin" />
-                    <span className="text-xs text-[#a0aec0]">Verifying face match...</span>
-                  </div>
-                )}
-
-                {verifyResult && !verifying && (
-                  <div className={cn(
-                    "flex items-start gap-3 rounded-lg p-3 border",
-                    verifyResult.match
-                      ? "bg-emerald-500/10 border-emerald-500/30"
-                      : "bg-red-500/10 border-red-500/30"
-                  )}>
-                    {verifyResult.match ? (
-                      <CheckCircle2 size={16} className="text-emerald-400 mt-0.5 shrink-0" />
-                    ) : (
-                      <XCircle size={16} className="text-red-400 mt-0.5 shrink-0" />
-                    )}
-                    <div>
-                      <p className={cn("text-xs font-semibold", verifyResult.match ? "text-emerald-400" : "text-red-400")}>
-                        {verifyResult.match ? "VERIFICATION PASSED" : "VERIFICATION FAILED"}
-                      </p>
-                      <p className="text-[10px] text-[#a0aec0] mt-0.5">{verifyResult.message}</p>
-                    </div>
-                  </div>
-                )}
-
                 {/* Hidden canvas for capture */}
                 <canvas ref={canvasRef} className="hidden" />
               </>
@@ -517,8 +467,8 @@ export default function SignupPage() {
                 <Button type="button" variant="ghost" size="lg" className="flex-1 tracking-widest"
                   onClick={() => { stopCamera(); setStep("documents"); }}>BACK</Button>
                 <Button type="submit" variant="cyan" size="lg" className="flex-1 tracking-widest"
-                  disabled={!verifyResult?.match || loading}>
-                  {loading ? "CREATING ACCOUNT..." : "VERIFY & SIGN UP"}
+                  disabled={!selfieBlob || loading}>
+                  {loading ? "CREATING ACCOUNT..." : "SIGN UP"}
                 </Button>
               </div>
             )}
