@@ -1,5 +1,5 @@
--- Admin Role Migration
--- Run this in your Supabase SQL Editor
+-- Combined migration: admin role, disputes table, and fixed RLS policies
+-- Run this in Supabase SQL Editor
 
 -- 1. Add admin role to profiles
 ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
@@ -45,49 +45,50 @@ CREATE POLICY "disputes_select_own" ON disputes FOR SELECT USING (auth.uid() = r
 -- Users can create disputes
 CREATE POLICY "disputes_insert_auth" ON disputes FOR INSERT WITH CHECK (auth.uid() = reported_by);
 
--- 7. Admin RLS policies - admins can read everything
+-- 7. Drop any old admin policies that might exist
+DROP POLICY IF EXISTS "listings_select_admin" ON listings;
+DROP POLICY IF EXISTS "listings_update_admin" ON listings;
+DROP POLICY IF EXISTS "bookings_select_admin" ON bookings;
+DROP POLICY IF EXISTS "bookings_update_admin" ON bookings;
+DROP POLICY IF EXISTS "reviews_select_admin" ON reviews;
+DROP POLICY IF EXISTS "profiles_select_admin" ON profiles;
+DROP POLICY IF EXISTS "profiles_update_admin" ON profiles;
+DROP POLICY IF EXISTS "disputes_select_admin" ON disputes;
+DROP POLICY IF EXISTS "disputes_update_admin" ON disputes;
+DROP POLICY IF EXISTS "disputes_delete_admin" ON disputes;
+
+-- 8. Admin RLS policies using JWT metadata (no profiles table lookup)
 CREATE POLICY "listings_select_admin" ON listings FOR SELECT USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  (auth.jwt()->'user_metadata'->>'role') = 'admin'
+);
+CREATE POLICY "listings_update_admin" ON listings FOR UPDATE USING (
+  (auth.jwt()->'user_metadata'->>'role') = 'admin'
 );
 
 CREATE POLICY "bookings_select_admin" ON bookings FOR SELECT USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  (auth.jwt()->'user_metadata'->>'role') = 'admin'
+);
+CREATE POLICY "bookings_update_admin" ON bookings FOR UPDATE USING (
+  (auth.jwt()->'user_metadata'->>'role') = 'admin'
 );
 
 CREATE POLICY "reviews_select_admin" ON reviews FOR SELECT USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  (auth.jwt()->'user_metadata'->>'role') = 'admin'
 );
 
 CREATE POLICY "profiles_select_admin" ON profiles FOR SELECT USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  (auth.jwt()->'user_metadata'->>'role') = 'admin'
+);
+CREATE POLICY "profiles_update_admin" ON profiles FOR UPDATE USING (
+  (auth.jwt()->'user_metadata'->>'role') = 'admin'
 );
 
 CREATE POLICY "disputes_select_admin" ON disputes FOR SELECT USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  (auth.jwt()->'user_metadata'->>'role') = 'admin'
 );
-
--- 8. Admin can update everything
-CREATE POLICY "listings_update_admin" ON listings FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
-
-CREATE POLICY "bookings_update_admin" ON bookings FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
-
-CREATE POLICY "profiles_update_admin" ON profiles FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
-
 CREATE POLICY "disputes_update_admin" ON disputes FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  (auth.jwt()->'user_metadata'->>'role') = 'admin'
 );
-
--- 9. Admin can delete disputes
 CREATE POLICY "disputes_delete_admin" ON disputes FOR DELETE USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  (auth.jwt()->'user_metadata'->>'role') = 'admin'
 );
-
--- 10. Create a default admin user (replace with your email)
--- First sign up normally, then run:
--- UPDATE profiles SET role = 'admin' WHERE email = 'your-email@example.com';
