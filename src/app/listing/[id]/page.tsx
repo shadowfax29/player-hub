@@ -3,25 +3,33 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { MapPin, Wifi, Users, Monitor, Utensils, Star, BadgeCheck, Clock } from "lucide-react";
+import { MapPin, Wifi, Users, Monitor, Utensils, Star, Calendar, Clock, CheckCircle2 } from "lucide-react";
 import { HomeLayout } from "@/components/layout/HomeLayout";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
 import { useAuth } from "@/lib/auth-context";
+import { getSupabase } from "@/lib/supabase";
 import type { Listing, Review } from "@/lib/types";
 
 export default function ListingDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const [listing, setListing] = useState<Listing | null>(null);
   const [listingReviews, setListingReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Booking form state
+  const [bookingDate, setBookingDate] = useState("");
+  const [startTime, setStartTime] = useState("10:00");
+  const [hours, setHours] = useState(1);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookingError, setBookingError] = useState("");
+
   useEffect(() => {
     if (!id) return;
-
     Promise.all([
       fetch(`/api/listings/${id}`).then((r) => r.json()),
       fetch(`/api/reviews?listing_id=${id}`).then((r) => r.json()),
@@ -37,10 +45,88 @@ export default function ListingDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleConfirmBooking = () => {
+  // Generate time options from open_time to close_time
+  const timeOptions = (() => {
+    if (!listing) return [];
+    const open = parseInt((listing.open_time || "10:00").split(":")[0], 10);
+    const close = parseInt((listing.close_time || "22:00").split(":")[0], 10);
+    const times: string[] = [];
+    for (let h = open; h < close; h++) {
+      times.push(`${String(h).padStart(2, "0")}:00`);
+    }
+    return times;
+  })();
+
+  const minHours = listing?.min_booking_hours || 1;
+  const maxHours = Math.min(listing?.max_booking_hours || 8, (() => {
+    if (!listing) return 8;
+    const close = parseInt((listing.close_time || "22:00").split(":")[0], 10);
+    const start = parseInt(startTime.split(":")[0], 10);
+    return Math.max(1, close - start);
+  })());
+  const hourOptions = Array.from({ length: maxHours - minHours + 1 }, (_, i) => minHours + i);
+
+  const totalPrice = listing ? listing.price_per_hour * hours : 0;
+
+  const endTime = (() => {
+    const startH = parseInt(startTime.split(":")[0], 10);
+    return `${String(startH + hours).padStart(2, "0")}:00`;
+  })();
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const handleBooking = async () => {
+    setBookingError("");
     if (!isLoggedIn) {
       router.push("/signup");
       return;
+    }
+    if (!bookingDate) {
+      setBookingError("Please select a date.");
+      return;
+    }
+    if (bookingDate < today) {
+      setBookingError("Cannot book a date in the past.");
+      return;
+    }
+
+    setBookingLoading(true);
+    try {
+      const { data: { session } } = await getSupabase().auth.getSession();
+      const token = session?.access_token;
+      if (!token) {
+        setBookingError("Session expired. Please log in again.");
+        setBookingLoading(false);
+        return;
+      }
+
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          listing_id: id,
+          booking_date: bookingDate,
+          start_time: startTime,
+          end_time: endTime,
+          hours,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setBookingError(data.error || "Failed to create booking.");
+        setBookingLoading(false);
+        return;
+      }
+
+      setBookingSuccess(true);
+      setBookingLoading(false);
+    } catch {
+      setBookingError("Something went wrong. Please try again.");
+      setBookingLoading(false);
     }
   };
 
@@ -64,6 +150,32 @@ export default function ListingDetailPage() {
       <HomeLayout>
         <div className="pt-24 px-4 md:px-8 pb-24 md:pb-8 text-center py-20">
           <p className="text-[#6b7280] text-lg">Listing not found.</p>
+        </div>
+      </HomeLayout>
+    );
+  }
+
+  if (bookingSuccess) {
+    return (
+      <HomeLayout>
+        <div className="pt-24 px-4 md:px-8 pb-24 md:pb-8 flex items-center justify-center min-h-[60vh]">
+          <div className="bg-[#161929] border border-[#1e2235] rounded-2xl p-8 max-w-md w-full text-center">
+            <CheckCircle2 size={48} className="text-emerald-400 mx-auto mb-4" />
+            <h2 className="font-heading text-2xl font-extrabold text-white tracking-wide mb-2">BOOKING CONFIRMED</h2>
+            <p className="text-[#a0aec0] text-sm mb-1">{listing.title}</p>
+            <p className="text-[#6b7280] text-xs mb-6">
+              {bookingDate} · {startTime} - {endTime} · {hours}hr · ${totalPrice.toFixed(2)}
+            </p>
+            <p className="text-[#6b7280] text-sm mb-6">Your booking is pending host confirmation.</p>
+            <div className="flex gap-3">
+              <Button variant="ghost" size="lg" className="flex-1 tracking-widest" onClick={() => router.push("/bookings")}>
+                VIEW BOOKINGS
+              </Button>
+              <Button variant="cyan" size="lg" className="flex-1 tracking-widest" onClick={() => router.push("/marketplace")}>
+                EXPLORE MORE
+              </Button>
+            </div>
+          </div>
         </div>
       </HomeLayout>
     );
@@ -99,8 +211,8 @@ export default function ListingDetailPage() {
           {/* Specs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
             {[
-              { icon: Monitor, label: "HARDWARE", value: listing.category.toUpperCase() },
-              { icon: Users, label: "CAPACITY", value: "4 Players" },
+              { icon: Monitor, label: "HARDWARE", value: listing.hardware || listing.category.toUpperCase() },
+              { icon: Users, label: "CAPACITY", value: `${listing.max_booking_hours || 8} Players` },
               { icon: Utensils, label: "SNACKS", value: "Available" },
               { icon: Wifi, label: "NETWORK", value: listing.internet_speed || "500 Mbps" },
             ].map(({ icon: Icon, label, value }) => (
@@ -167,26 +279,83 @@ export default function ListingDetailPage() {
         </div>
 
         {/* Booking sidebar */}
-        <div className="w-full lg:w-72 shrink-0">
+        <div className="w-full lg:w-80 shrink-0">
           <div className="bg-[#161929] border border-[#1e2235] rounded-xl p-5 lg:sticky lg:top-20">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <span className="text-3xl font-heading font-bold text-white">${listing.price_per_hour}</span>
-                <span className="text-[#6b7280] text-sm"> / HOUR</span>
+            <div className="flex items-baseline gap-2 mb-5">
+              <span className="text-3xl font-heading font-bold text-white">${listing.price_per_hour}</span>
+              <span className="text-[#6b7280] text-sm">/ HOUR</span>
+            </div>
+
+            {/* Date */}
+            <div className="mb-4">
+              <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-1.5">
+                <Calendar size={12} className="inline mr-1" /> DATE
+              </label>
+              <input
+                type="date"
+                min={today}
+                value={bookingDate}
+                onChange={(e) => setBookingDate(e.target.value)}
+                className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-400/50 transition-colors [color-scheme:dark]"
+              />
+            </div>
+
+            {/* Start Time */}
+            <div className="mb-4">
+              <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-1.5">
+                <Clock size={12} className="inline mr-1" /> START TIME
+              </label>
+              <select
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-3 py-2.5 text-sm text-white outline-none appearance-none cursor-pointer"
+              >
+                {timeOptions.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Hours */}
+            <div className="mb-4">
+              <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-1.5">HOURS</label>
+              <select
+                value={hours}
+                onChange={(e) => setHours(Number(e.target.value))}
+                className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-3 py-2.5 text-sm text-white outline-none appearance-none cursor-pointer"
+              >
+                {hourOptions.map((h) => (
+                  <option key={h} value={h}>{h} {h === 1 ? "hour" : "hours"}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Price breakdown */}
+            <div className="bg-[#0d0f1a] rounded-lg p-3 mb-4 space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-[#6b7280]">${listing.price_per_hour} x {hours} {hours === 1 ? "hour" : "hours"}</span>
+                <span className="text-white">${totalPrice.toFixed(2)}</span>
               </div>
-              <div className="text-right">
-                <p className="text-cyan-400 text-[10px] font-bold tracking-widest">PEAK TIME</p>
-                <p className="text-cyan-400 text-xs">Instant Book</p>
+              <div className="border-t border-white/5 pt-2 flex justify-between text-sm font-bold">
+                <span className="text-white">TOTAL</span>
+                <span className="text-cyan-400">${totalPrice.toFixed(2)}</span>
               </div>
             </div>
+
+            {bookingError && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
+                <p className="text-red-400 text-xs">{bookingError}</p>
+              </div>
+            )}
 
             <Button
               variant="cyan"
               size="lg"
               className="w-full tracking-widest mb-2"
-              onClick={handleConfirmBooking}
+              onClick={handleBooking}
+              disabled={bookingLoading}
             >
-              {isLoggedIn ? "CONFIRM BOOKING" : "SIGN UP TO BOOK"}
+              {bookingLoading ? "BOOKING..." : isLoggedIn ? "CONFIRM BOOKING" : "SIGN UP TO BOOK"}
             </Button>
             <p className="text-center text-[10px] text-[#6b7280]">
               {isLoggedIn ? "You won't be charged yet" : "Create an account to continue"}
