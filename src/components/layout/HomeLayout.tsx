@@ -42,7 +42,7 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
     });
   }, [user]);
 
-  const isAdmin = profileRole === "admin";
+  const isAdmin = profileRole === "admin" || role === "admin";
   const navLinks = role === "host" ? hostLinks : isLoggedIn ? guestLinks : baseLinks;
   const topLinks = [...navLinks, ...(isLoggedIn ? authLinks : [])];
 
