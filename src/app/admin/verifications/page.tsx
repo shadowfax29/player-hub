@@ -23,12 +23,12 @@ export default function AdminVerificationsPage() {
 
   const fetchPending = async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/users?role=host", {
+    const res = await fetch("/api/admin/users", {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) {
       const all = await res.json();
-      setUsers(all.filter((u: User) => !u.verified && (u.selfie_url || u.id_document_url)));
+      setUsers(all.filter((u: User) => !u.verified));
     }
     setLoading(false);
   };
@@ -67,7 +67,7 @@ export default function AdminVerificationsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-2xl md:text-3xl font-extrabold text-white tracking-wide">Verifications</h1>
-        <p className="text-[#6b7280] text-sm mt-1">Review government IDs and selfies for host verification</p>
+        <p className="text-[#6b7280] text-sm mt-1">Review and verify user accounts</p>
       </div>
 
       {loading ? (
