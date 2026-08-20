@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { Footer } from "./Footer";
+import { useEffect, useState } from "react";
+import { getSupabase } from "@/lib/supabase";
 
 const baseLinks = [
   { label: "Home", href: "/" },
@@ -31,6 +33,16 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { isLoggedIn, loading, user, signOut } = useAuth();
   const role = user?.user_metadata?.role;
+  const [profileRole, setProfileRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    getSupabase().from("profiles").select("role").eq("id", user.id).single().then(({ data }) => {
+      setProfileRole(data?.role || null);
+    });
+  }, [user]);
+
+  const isAdmin = profileRole === "admin";
   const navLinks = role === "host" ? hostLinks : isLoggedIn ? guestLinks : baseLinks;
   const topLinks = [...navLinks, ...(isLoggedIn ? authLinks : [])];
 
@@ -70,6 +82,11 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
             {!loading && (
               isLoggedIn ? (
                 <div className="flex items-center gap-3">
+                  {isAdmin && (
+                    <Link href="/admin" className="text-[10px] text-purple-400 hover:text-purple-300 tracking-widest transition-colors font-headline uppercase font-bold">
+                      Admin
+                    </Link>
+                  )}
                   <Link href="/profile" className="text-[10px] text-[#6b7280] hover:text-white tracking-widest transition-colors font-headline uppercase">
                     Profile
                   </Link>
@@ -124,6 +141,12 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
             <Link href="/bookings" className="flex flex-col items-center gap-0.5 text-slate-400 min-w-0">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
               <span className="text-[9px] font-headline uppercase">Bookings</span>
+            </Link>
+          )}
+          {!loading && isLoggedIn && isAdmin && (
+            <Link href="/admin" className="flex flex-col items-center gap-0.5 text-purple-400 min-w-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+              <span className="text-[9px] font-headline uppercase font-bold">Admin</span>
             </Link>
           )}
           {!loading && isLoggedIn ? (
