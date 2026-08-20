@@ -1,26 +1,72 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Radio } from "lucide-react";
+import { Radio, Calendar, Clock, MapPin, Gamepad2 } from "lucide-react";
 import { HomeLayout } from "@/components/layout/HomeLayout";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { ListingStepper } from "@/components/dashboard/ListingStepper";
 import { useAuth } from "@/lib/auth-context";
 import { getSupabase } from "@/lib/supabase";
+import { SessionControls } from "@/components/session/SessionControls";
 import type { Listing } from "@/lib/types";
 
 interface HostBooking {
   id: string;
   status: string;
   total_price: number;
+  hours: number;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  session_started_at: string | null;
+  session_ends_at: string | null;
+  session_active: boolean;
+  host_confirmed_end: boolean;
+  guest_confirmed_end: boolean;
+  host_wants_continue: boolean;
+  guest_wants_continue: boolean;
+  continue_notes: string | null;
+  host_id: string;
+  guest_id: string;
+  listings: { title: string; image: string; location: string } | null;
 }
+
+const statusColors: Record<string, string> = {
+  confirmed: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  pending: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  active: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+  awaiting_confirmation: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  awaiting_continue: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+  completed: "bg-slate-500/20 text-slate-400 border-slate-500/30",
+  cancelled: "bg-red-500/20 text-red-400 border-red-500/30",
+};
+
+const statusLabels: Record<string, string> = {
+  active: "LIVE",
+  awaiting_confirmation: "CONFIRMING",
+  awaiting_continue: "CONTINUE?",
+};
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [listings, setListings] = useState<Listing[]>([]);
   const [bookings, setBookings] = useState<HostBooking[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const fetchBookings = useCallback(async () => {
+    if (!user) return;
+    const { data: { session } } = await getSupabase().auth.getSession();
+    const token = session?.access_token;
+    if (!token) return;
+    try {
+      const res = await fetch("/api/bookings?role=host", { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      setBookings(data.bookings || []);
+    } catch {
+      setBookings([]);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -31,17 +77,13 @@ export default function DashboardPage() {
     ]).then(([sessionRes, listingsRes]) => {
       const token = sessionRes.data.session?.access_token;
       setListings(listingsRes.listings || []);
-
-      if (token) {
-        fetch("/api/bookings?role=host", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-          .then((r) => r.json())
-          .then((data) => setBookings(data.bookings || []))
-          .catch(() => {});
-      }
+      if (token) fetchBookings();
     }).finally(() => setLoading(false));
-  }, [user]);
+  }, [user, fetchBookings]);
+
+  const handleBookingUpdate = (updated: Partial<HostBooking> & { id: string }) => {
+    setBookings((prev) => prev.map((b) => (b.id === updated.id ? { ...b, ...updated } : b)));
+  };
 
   const totalEarnings = bookings
     .filter((b) => b.status === "completed")
@@ -90,6 +132,60 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
+
+            {/* Active Bookings with Session Controls */}
+            {bookings.filter((b) => !["completed", "cancelled"].includes(b.status)).length > 0 && (
+              <div className="mb-8">
+                <h2 className="font-heading text-lg font-bold text-white mb-4 tracking-wide border-l-4 border-cyan-500 pl-3">
+                  ACTIVE BOOKINGS
+                </h2>
+                <div className="space-y-4">
+                  {bookings
+                    .filter((b) => !["completed", "cancelled"].includes(b.status))
+                    .map((booking) => (
+                      <div key={booking.id} className="bg-[#161929] border border-[#1e2235] rounded-xl overflow-hidden">
+                        <div className="p-4 flex flex-col sm:flex-row gap-4">
+                          <div className="w-full sm:w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-[#1a1d2e]">
+                            {booking.listings?.image ? (
+                              <img src={booking.listings.image} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Gamepad2 size={20} className="text-[#6b7280]" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <h3 className="font-heading text-sm font-bold text-white truncate">
+                                {booking.listings?.title || "Unknown"}
+                              </h3>
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest border ${
+                                statusColors[booking.status] || ""
+                              }`}>
+                                {statusLabels[booking.status] || booking.status.toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-3 text-[10px] text-[#6b7280]">
+                              <span className="flex items-center gap-1"><MapPin size={10} className="text-cyan-400" />{booking.listings?.location || "—"}</span>
+                              <span className="flex items-center gap-1"><Calendar size={10} className="text-cyan-400" />{new Date(booking.booking_date).toLocaleDateString()}</span>
+                              <span className="flex items-center gap-1"><Clock size={10} className="text-cyan-400" />{booking.start_time} — {booking.end_time}</span>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0 sm:self-center">
+                            <p className="text-sm font-heading font-bold text-white">${booking.total_price}</p>
+                            <p className="text-[9px] text-[#6b7280] tracking-widest">{booking.hours}H</p>
+                          </div>
+                        </div>
+                        {user && (
+                          <div className="px-4 pb-4">
+                            <SessionControls booking={booking} userId={user.id} onBookingUpdate={handleBookingUpdate} />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
 
             {/* Listing Stepper */}
             <ListingStepper />
