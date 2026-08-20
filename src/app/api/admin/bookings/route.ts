@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from("bookings")
-    .select("*, listings(title, location, image), guest:profiles!bookings_guest_id_fkey(full_name, email), host:profiles!bookings_host_id_fkey(full_name, email)")
+    .select("*")
     .order("created_at", { ascending: false });
 
   if (status) query = query.eq("status", status);

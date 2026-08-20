@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const approved = searchParams.get("approved");
   const search = searchParams.get("search");
 
-  let query = supabase.from("listings").select("*, profiles!listings_host_id_fkey(full_name, email)").order("created_at", { ascending: false });
+  let query = supabase.from("listings").select("*").order("created_at", { ascending: false });
 
   if (status) query = query.eq("status", status);
   if (approved === "true") query = query.eq("approved", true);

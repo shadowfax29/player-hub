@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from("disputes")
-    .select("*, bookings(listing_id, total_price, booking_date), reporter:profiles!disputes_reported_by_fkey(full_name, email), against:profiles!disputes_against_user_fkey(full_name, email)")
+    .select("*")
     .order("created_at", { ascending: false });
 
   if (status) query = query.eq("status", status);
