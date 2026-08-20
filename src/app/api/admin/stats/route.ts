@@ -1,25 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getAdminClient } from "@/lib/admin-auth";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-async function requireAdmin(request: NextRequest) {
-  const auth = request.headers.get("authorization");
-  if (!auth?.startsWith("Bearer ")) return { error: "Unauthorized", status: 401 };
-  const token = auth.slice(7);
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) return { error: "Unauthorized", status: 401 };
-  if (user.user_metadata?.role !== "admin") return { error: "Forbidden", status: 403 };
-  return { user };
-}
-
-// GET /api/admin/stats
 export async function GET(request: NextRequest) {
-  const auth = await requireAdmin(request);
+  const auth = await getAdminClient(request);
   if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  const supabase = auth.client;
 
   const [usersRes, listingsRes, bookingsRes, reviewsRes, disputesRes] = await Promise.all([
     supabase.from("profiles").select("id, role, verified, banned", { count: "exact" }),
