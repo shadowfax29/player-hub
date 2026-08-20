@@ -4,12 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { getSupabase } from "@/lib/supabase";
 
 const adminLinks = [
   { label: "Dashboard", href: "/admin", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" },
@@ -35,7 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return;
     }
     const checkAdmin = async () => {
-      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+      const { data } = await getSupabase().from("profiles").select("role").eq("id", user.id).single();
       if (data?.role === "admin") {
         setIsAdmin(true);
       } else {
