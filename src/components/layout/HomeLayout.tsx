@@ -5,8 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { Footer } from "./Footer";
-import { useEffect, useState } from "react";
-import { getSupabase } from "@/lib/supabase";
 
 const baseLinks = [
   { label: "Home", href: "/" },
@@ -33,16 +31,7 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { isLoggedIn, loading, user, signOut } = useAuth();
   const role = user?.user_metadata?.role;
-  const [profileRole, setProfileRole] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-    getSupabase().from("profiles").select("role").eq("id", user.id).single().then(({ data }) => {
-      setProfileRole(data?.role || null);
-    });
-  }, [user]);
-
-  const isAdmin = profileRole === "admin" || role === "admin";
+  const isAdmin = role === "admin";
   const navLinks = role === "host" ? hostLinks : isLoggedIn ? guestLinks : baseLinks;
   const topLinks = [...navLinks, ...(isLoggedIn ? authLinks : [])];
 
