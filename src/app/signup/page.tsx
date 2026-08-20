@@ -75,15 +75,18 @@ export default function SignupPage() {
         audio: false,
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
       setCameraActive(true);
     } catch {
       setError("Camera access denied. Please allow camera permissions and try again.");
     }
   };
+
+  useEffect(() => {
+    if (cameraActive && streamRef.current && videoRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [cameraActive]);
 
   const stopCamera = () => {
     if (streamRef.current) {
@@ -410,7 +413,6 @@ export default function SignupPage() {
                     <>
                       <video ref={videoRef} autoPlay playsInline muted
                         className="w-full h-56 object-cover" style={{ transform: "scaleX(-1)" }} />
-                      <canvas ref={canvasRef} className="hidden" />
                       {/* Overlay guide */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="w-32 h-32 rounded-full border-2 border-dashed border-white/40" />
