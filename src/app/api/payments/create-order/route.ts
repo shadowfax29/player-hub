@@ -2,11 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Razorpay from "razorpay";
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
-
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -66,6 +61,11 @@ export async function POST(request: NextRequest) {
   // Razorpay amount in paise (INR). If your prices are in USD, convert to INR.
   // For now we assume prices are already in INR-compatible units (multiply by 100 for paise).
   const amountInPaise = Math.round(booking.total_price * 100);
+
+  const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID!,
+    key_secret: process.env.RAZORPAY_KEY_SECRET!,
+  });
 
   const order = await razorpay.orders.create({
     amount: amountInPaise,
