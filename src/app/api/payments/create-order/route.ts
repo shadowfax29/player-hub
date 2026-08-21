@@ -2,11 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Razorpay from "razorpay";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) {
@@ -32,8 +27,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "booking_id is required" }, { status: 400 });
   }
 
-  // Fetch the booking and verify ownership
-  const { data: booking, error: bookingError } = await supabase
+  // Fetch the booking and verify ownership (use auth client for RLS)
+  const { data: booking, error: bookingError } = await auth
     .from("bookings")
     .select("id, guest_id, total_price, payment_status, listing_id")
     .eq("id", booking_id)
@@ -52,7 +47,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Fetch listing title for the receipt
-  const { data: listing } = await supabase
+  const { data: listing } = await auth
     .from("listings")
     .select("title")
     .eq("id", booking.listing_id)
