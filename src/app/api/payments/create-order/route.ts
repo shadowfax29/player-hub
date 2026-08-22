@@ -53,40 +53,46 @@ export async function POST(request: NextRequest) {
     .eq("id", booking.listing_id)
     .single();
 
-  // Razorpay amount in paise (INR). If your prices are in USD, convert to INR.
-  // For now we assume prices are already in INR-compatible units (multiply by 100 for paise).
+  if (!process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID.includes("placeholder")) {
+    return NextResponse.json({ error: "Payment not configured. Razorpay keys missing." }, { status: 503 });
+  }
+
   const amountInPaise = Math.round(booking.total_price * 100);
 
-  const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID!,
-    key_secret: process.env.RAZORPAY_KEY_SECRET!,
-  });
+  try {
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID!,
+      key_secret: process.env.RAZORPAY_KEY_SECRET!,
+    });
 
-  const order = await razorpay.orders.create({
-    amount: amountInPaise,
-    currency: "INR",
-    receipt: `bk_${booking.id.slice(0, 30)}`,
-    notes: {
-      booking_id: booking.id,
-      guest_id: user.id,
-      listing_title: listing?.title || "Gaming Session",
-    },
-  });
+    const order = await razorpay.orders.create({
+      amount: amountInPaise,
+      currency: "INR",
+      receipt: `bk_${booking.id.slice(0, 30)}`,
+      notes: {
+        booking_id: booking.id,
+        guest_id: user.id,
+        listing_title: listing?.title || "Gaming Session",
+      },
+    });
 
-  // Store order_id on the booking
-  await auth
-    .from("bookings")
-    .update({ payment_order_id: order.id })
-    .eq("id", booking.id);
+    await auth
+      .from("bookings")
+      .update({ payment_order_id: order.id })
+      .eq("id", booking.id);
 
-  return NextResponse.json({
-    orderId: order.id,
-    amount: order.amount,
-    currency: order.currency,
-    keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-    bookingId: booking.id,
-    listingTitle: listing?.title || "Gaming Session",
-    customerName: user.user_metadata?.full_name || user.email?.split("@")[0] || "",
-    customerEmail: user.email || "",
-  });
+    return NextResponse.json({
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      bookingId: booking.id,
+      listingTitle: listing?.title || "Gaming Session",
+      customerName: user.user_metadata?.full_name || user.email?.split("@")[0] || "",
+      customerEmail: user.email || "",
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Razorpay order creation failed";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
