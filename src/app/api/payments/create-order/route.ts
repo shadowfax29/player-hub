@@ -53,8 +53,9 @@ export async function POST(request: NextRequest) {
     .eq("id", booking.listing_id)
     .single();
 
-  if (!process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID.includes("placeholder")) {
-    return NextResponse.json({ error: "Payment not configured. Razorpay keys missing." }, { status: 503 });
+  const rzpKey = process.env.RAZORPAY_KEY_ID;
+  if (!rzpKey || rzpKey.includes("placeholder") || rzpKey.length < 10) {
+    return NextResponse.json({ error: "Razorpay keys not configured in Vercel. Go to Settings → Environment Variables and add RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, NEXT_PUBLIC_RAZORPAY_KEY_ID. Then REDEPLOY." }, { status: 503 });
   }
 
   const amountInPaise = Math.round(booking.total_price * 100);
