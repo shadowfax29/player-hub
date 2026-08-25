@@ -1,12 +1,14 @@
 "use client";
 
-import { Mail, Shield, Calendar, Gamepad2, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Mail, Shield, Calendar, Gamepad2, LogOut, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { HomeLayout } from "@/components/layout/HomeLayout";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth-context";
 import { HostBankSetup } from "@/components/payment/HostBankSetup";
+import { getSupabase } from "@/lib/supabase";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -14,6 +16,33 @@ export default function ProfilePage() {
   const fullName = user?.user_metadata?.full_name || "User";
   const email = user?.email || "user@example.com";
   const role = user?.user_metadata?.role || "guest";
+
+  const [sessionsPlayed, setSessionsPlayed] = useState<number | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    async function fetchStats() {
+      try {
+        const supabase = getSupabase();
+        const { count } = await supabase
+          .from("bookings")
+          .select("*", { count: "exact", head: true })
+          .eq("guest_id", user!.id)
+          .eq("status", "completed");
+        setSessionsPlayed(count ?? 0);
+      } catch {
+        setSessionsPlayed(0);
+      } finally {
+        setLoadingStats(false);
+      }
+    }
+    fetchStats();
+  }, [user]);
+
+  const memberSince = user?.created_at
+    ? new Date(user.created_at).toLocaleDateString("en-IN", { month: "short", year: "numeric" })
+    : "—";
 
   return (
     <AuthGuard>
@@ -54,12 +83,14 @@ export default function ProfilePage() {
           <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6">
             <div className="bg-[#1a1d2e] border border-[#2a2d45] rounded-xl p-3 md:p-4 text-center">
               <Gamepad2 size={20} className="text-cyan-400 mx-auto mb-2" />
-              <p className="text-lg md:text-xl font-bold text-white">12</p>
+              <p className="text-lg md:text-xl font-bold text-white">
+                {loadingStats ? <Loader2 size={16} className="animate-spin inline" /> : sessionsPlayed ?? 0}
+              </p>
               <p className="text-[10px] text-[#6b7280] tracking-widest">SESSIONS PLAYED</p>
             </div>
             <div className="bg-[#1a1d2e] border border-[#2a2d45] rounded-xl p-3 md:p-4 text-center">
               <Calendar size={20} className="text-purple-400 mx-auto mb-2" />
-              <p className="text-lg md:text-xl font-bold text-white">Mar 2024</p>
+              <p className="text-lg md:text-xl font-bold text-white">{memberSince}</p>
               <p className="text-[10px] text-[#6b7280] tracking-widest">MEMBER SINCE</p>
             </div>
           </div>

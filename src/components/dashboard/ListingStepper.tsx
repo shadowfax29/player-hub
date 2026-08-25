@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Check, ChevronRight, ChevronLeft, Plus, X, Upload, MapPin, Gamepad2, Camera, Clock, Shield, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Check, ChevronRight, ChevronLeft, Plus, X, Upload, MapPin, Gamepad2, Camera, Clock, Shield, Loader2, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
@@ -106,7 +106,29 @@ export function ListingStepper() {
   const [form, setForm] = useState<FormData>(defaultForm);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [bankChecked, setBankChecked] = useState(false);
+  const [hasBankDetails, setHasBankDetails] = useState(false);
   const { user } = useAuth();
+
+  useEffect(() => {
+    async function checkBank() {
+      try {
+        const { data: { session } } = await getSupabase().auth.getSession();
+        const token = session?.access_token;
+        if (!token) return;
+        const res = await fetch("/api/host/onboard", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setHasBankDetails(data.hasBankDetails || data.onboarded);
+      } catch {
+        setHasBankDetails(false);
+      } finally {
+        setBankChecked(true);
+      }
+    }
+    checkBank();
+  }, []);
 
   const updateField = (field: keyof FormData, value: unknown) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -597,6 +619,31 @@ export function ListingStepper() {
       </label>
     </div>
   );
+
+  if (!bankChecked) {
+    return (
+      <div className="bg-[#161929] border border-[#1e2235] rounded-xl p-8 text-center">
+        <Loader2 size={24} className="text-cyan-400 mx-auto mb-3 animate-spin" />
+        <p className="text-[#6b7280] text-sm">Checking bank details...</p>
+      </div>
+    );
+  }
+
+  if (!hasBankDetails) {
+    return (
+      <div className="bg-[#161929] border border-amber-500/30 rounded-xl p-8 text-center">
+        <CreditCard size={32} className="text-amber-400 mx-auto mb-4" />
+        <h3 className="font-heading text-lg font-bold text-white tracking-wide mb-2">BANK DETAILS REQUIRED</h3>
+        <p className="text-[#6b7280] text-sm max-w-md mx-auto mb-1">
+          You need to add your bank account details before creating a listing.
+          This is required to receive guest payments via Razorpay Route.
+        </p>
+        <p className="text-[#6b7280] text-xs">
+          Go to <span className="text-cyan-400">Profile</span> → <span className="text-white">Bank Details for Payouts</span> to add your account.
+        </p>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
