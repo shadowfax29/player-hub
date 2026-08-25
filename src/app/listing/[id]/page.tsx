@@ -171,7 +171,7 @@ export default function ListingDetailPage() {
             <h2 className="font-heading text-2xl font-extrabold text-white tracking-wide mb-2">BOOKING CONFIRMED</h2>
             <p className="text-[#a0aec0] text-sm mb-1">{listing.title}</p>
             <p className="text-[#6b7280] text-xs mb-6">
-              {bookingDate} · {startTime} - {endTime} · {hours}hr · ${totalPrice.toFixed(2)}
+              {bookingDate} · {startTime} - {endTime} · {hours}hr · ₹{totalPrice.toFixed(2)}
             </p>
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 mb-6">
               <p className="text-emerald-400 text-xs font-bold tracking-wide">PAYMENT CONFIRMED</p>
@@ -206,11 +206,11 @@ export default function ListingDetailPage() {
             <div className="bg-[#0d0f1a] rounded-lg p-4 mb-6">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-[#6b7280]">Session Total</span>
-                <span className="text-white font-bold">${totalPrice.toFixed(2)}</span>
+                <span className="text-white font-bold">₹{totalPrice.toFixed(2)}</span>
               </div>
               <div className="border-t border-white/5 pt-2 flex justify-between">
                 <span className="text-white font-bold">PAY NOW</span>
-                <span className="text-cyan-400 font-bold text-lg">${totalPrice.toFixed(2)}</span>
+                <span className="text-cyan-400 font-bold text-lg">₹{totalPrice.toFixed(2)}</span>
               </div>
             </div>
 
@@ -337,7 +337,7 @@ export default function ListingDetailPage() {
         <div className="w-full lg:w-80 shrink-0">
           <div className="bg-[#161929] border border-[#1e2235] rounded-xl p-5 lg:sticky lg:top-20">
             <div className="flex items-baseline gap-2 mb-5">
-              <span className="text-3xl font-heading font-bold text-white">${listing.price_per_hour}</span>
+              <span className="text-3xl font-heading font-bold text-white">₹{listing.price_per_hour}</span>
               <span className="text-[#6b7280] text-sm">/ HOUR</span>
             </div>
 
@@ -388,12 +388,12 @@ export default function ListingDetailPage() {
             {/* Price breakdown */}
             <div className="bg-[#0d0f1a] rounded-lg p-3 mb-4 space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-[#6b7280]">${listing.price_per_hour} x {hours} {hours === 1 ? "hour" : "hours"}</span>
-                <span className="text-white">${totalPrice.toFixed(2)}</span>
+                <span className="text-[#6b7280]">₹{listing.price_per_hour} x {hours} {hours === 1 ? "hour" : "hours"}</span>
+                <span className="text-white">₹{totalPrice.toFixed(2)}</span>
               </div>
               <div className="border-t border-white/5 pt-2 flex justify-between text-sm font-bold">
                 <span className="text-white">TOTAL</span>
-                <span className="text-cyan-400">${totalPrice.toFixed(2)}</span>
+                <span className="text-cyan-400">₹{totalPrice.toFixed(2)}</span>
               </div>
             </div>
 

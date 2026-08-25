@@ -40,7 +40,7 @@ export function ListingCard({ listing }: ListingCardProps) {
             {listing.title}
           </h3>
           <div className="text-right shrink-0">
-            <span className="text-cyan-400 font-bold text-base">${listing.price_per_hour}</span>
+            <span className="text-cyan-400 font-bold text-base">₹{listing.price_per_hour}</span>
             <span className="text-[#6b7280] text-xs">/hr</span>
           </div>
         </div>

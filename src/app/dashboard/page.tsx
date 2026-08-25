@@ -244,7 +244,7 @@ export default function DashboardPage() {
                             </div>
                           </div>
                           <div className="text-right shrink-0 sm:self-center">
-                            <p className="text-sm font-heading font-bold text-white">${booking.total_price}</p>
+                            <p className="text-sm font-heading font-bold text-white">₹{booking.total_price}</p>
                             <p className="text-[9px] text-[#6b7280] tracking-widest">{booking.hours}H</p>
                           </div>
                         </div>
@@ -301,7 +301,7 @@ export default function DashboardPage() {
                           <p className="text-[10px] text-[#6b7280] mb-1">{listing.location}</p>
                           <div className="flex items-center justify-between">
                             <span className="text-cyan-400 text-xs font-bold">
-                              ${listing.price_per_hour}<span className="text-[#6b7280] font-normal">/hr</span>
+                              ₹{listing.price_per_hour}<span className="text-[#6b7280] font-normal">/hr</span>
                             </span>
                             <span className={`text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded ${
                               listing.status === "active" ? "bg-emerald-500/20 text-emerald-400" :

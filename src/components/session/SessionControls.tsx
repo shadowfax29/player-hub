@@ -284,7 +284,7 @@ export function SessionControls({ booking, userId, onBookingUpdate }: SessionCon
             <p className="text-[10px] text-emerald-400 tracking-widest font-bold">SESSION COMPLETED</p>
           </div>
           <p className="text-[#a0aec0] text-xs">
-            Total: ${booking.total_price.toFixed(2)} · {booking.hours}hr
+            Total: ₹{booking.total_price.toFixed(2)} · {booking.hours}hr
           </p>
         </div>
 

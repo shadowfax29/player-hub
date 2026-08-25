@@ -117,7 +117,7 @@ export default function AdminDisputesPage() {
                     Reported by: <span className="text-white">{d.reporter?.full_name || d.reporter?.email || "Unknown"}</span>
                     {d.against && <> · Against: <span className="text-white">{d.against.full_name || d.against.email}</span></>}
                   </p>
-                  {d.bookings && <p className="text-[#6b7280] text-xs">Booking: {d.bookings.booking_date} · ${d.bookings.total_price}</p>}
+                    {d.bookings && <p className="text-[#6b7280] text-xs">Booking: {d.bookings.booking_date} · ₹{d.bookings.total_price}</p>}
                   {d.admin_notes && <p className="text-purple-400 text-xs mt-1">Admin notes: {d.admin_notes}</p>}
                 </div>
                 <span className="text-[#4a4d65] text-xs shrink-0">{new Date(d.created_at).toLocaleDateString()}</span>

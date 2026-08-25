@@ -130,8 +130,24 @@ export default function SignupPage() {
         notify("Passwords do not match");
         return;
       }
-      if (password.length < 6) {
-        notify("Password must be at least 6 characters");
+      if (password.length < 8) {
+        notify("Password must be at least 8 characters");
+        return;
+      }
+      if (!/[A-Z]/.test(password)) {
+        notify("Password must contain at least one uppercase letter");
+        return;
+      }
+      if (!/[a-z]/.test(password)) {
+        notify("Password must contain at least one lowercase letter");
+        return;
+      }
+      if (!/[0-9]/.test(password)) {
+        notify("Password must contain at least one number");
+        return;
+      }
+      if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        notify("Password must contain at least one special character");
         return;
       }
       setStep("documents");
@@ -328,7 +344,7 @@ export default function SignupPage() {
                   <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">PASSWORD</label>
                   <div className="relative">
                     <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Min 6 characters" required
+                      placeholder="Min 8 chars, A-Z, a-z, 0-9, !@#" required
                       className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 pr-10 text-sm text-white placeholder-[#4a4d65] outline-none focus:border-cyan-400/50 transition-colors" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-white transition-colors">

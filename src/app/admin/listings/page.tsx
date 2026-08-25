@@ -113,7 +113,7 @@ export default function AdminListingsPage() {
                   </span>
                   {!l.approved && <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">NEEDS APPROVAL</span>}
                 </div>
-                <p className="text-[#6b7280] text-xs mt-1">{l.location} · ${l.price_per_hour}/hr · {l.category} · by {l.profiles?.full_name || l.profiles?.email || "Unknown"}</p>
+                <p className="text-[#6b7280] text-xs mt-1">{l.location} · ₹{l.price_per_hour}/hr · {l.category} · by {l.profiles?.full_name || l.profiles?.email || "Unknown"}</p>
                 {l.rejection_reason && <p className="text-red-400 text-xs mt-1">Rejected: {l.rejection_reason}</p>}
               </div>
               <div className="flex gap-2 shrink-0">

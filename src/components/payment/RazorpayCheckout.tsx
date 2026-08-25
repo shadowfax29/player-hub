@@ -189,7 +189,7 @@ export function RazorpayCheckout({ bookingId, amount, listingTitle, onSuccess, o
         ) : (
           <span className="flex items-center justify-center gap-2">
             <CreditCard size={16} />
-            PAY ${amount.toFixed(2)}
+            PAY ₹{amount.toFixed(2)}
           </span>
         )}
       </Button>

@@ -59,7 +59,7 @@ export default function AdminDashboard() {
         <StatCard label="Total Users" value={stats.users.total} sub={`${stats.users.hosts} hosts · ${stats.users.guests} guests`} color="text-white" />
         <StatCard label="Total Listings" value={stats.listings.total} sub={`${stats.listings.active} active · ${stats.listings.needsApproval} need approval`} color="text-white" />
         <StatCard label="Total Bookings" value={stats.bookings.total} sub={`${stats.bookings.completed} completed`} color="text-white" />
-        <StatCard label="Revenue" value={`$${stats.bookings.totalRevenue.toLocaleString()}`} sub={`${stats.bookings.pending} pending bookings`} color="text-emerald-400" />
+        <StatCard label="Revenue" value={`₹${stats.bookings.totalRevenue.toLocaleString()}`} sub={`${stats.bookings.pending} pending bookings`} color="text-emerald-400" />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

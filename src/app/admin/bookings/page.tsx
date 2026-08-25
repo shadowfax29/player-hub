@@ -101,7 +101,7 @@ export default function AdminBookingsPage() {
                   {b.guest?.full_name || b.guest?.email || "Unknown guest"} → {b.host?.full_name || b.host?.email || "Unknown host"}
                 </p>
                 <p className="text-[#6b7280] text-xs">
-                  {b.booking_date} · {b.start_time}–{b.end_time} · {b.hours}h · ${b.total_price}
+                  {b.booking_date} · {b.start_time}–{b.end_time} · {b.hours}h · ₹{b.total_price}
                 </p>
               </div>
               <div className="flex gap-2 shrink-0">

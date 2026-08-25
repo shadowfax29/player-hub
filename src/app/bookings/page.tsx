@@ -159,7 +159,7 @@ export default function BookingsPage() {
                     </div>
 
                     <div className="text-right shrink-0 sm:self-center">
-                      <p className="text-lg font-heading font-bold text-white">${booking.total_price}</p>
+                      <p className="text-lg font-heading font-bold text-white">₹{booking.total_price}</p>
                       <p className="text-[10px] text-[#6b7280] tracking-widest">{booking.hours}H SESSION</p>
                     </div>
                   </div>

@@ -247,7 +247,7 @@ export function ListingStepper() {
           </select>
         </div>
         <div>
-          <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">HOURLY RATE (USD)</label>
+          <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">HOURLY RATE (INR)</label>
           <div className="flex items-center bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 gap-2">
             <span className="text-[#6b7280] text-sm">$</span>
             <input
@@ -567,7 +567,7 @@ export function ListingStepper() {
         <ReviewRow label="Category" value={CATEGORIES.find((c) => c.value === form.category)?.label || "—"} />
         <ReviewRow label="Location" value={form.location || "—"} />
         <ReviewRow label="Address" value={form.address || "—"} />
-        <ReviewRow label="Hourly Rate" value={`$${form.hourlyRate}/hr`} />
+        <ReviewRow label="Hourly Rate" value={`₹${form.hourlyRate}/hr`} />
         <ReviewRow label="Hardware" value={form.hardware} />
         <ReviewRow label="TV / Monitor" value={form.tvSize} />
         <ReviewRow label="Internet" value={form.internetSpeed} />
