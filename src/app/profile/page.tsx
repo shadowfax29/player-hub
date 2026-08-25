@@ -6,6 +6,7 @@ import { HomeLayout } from "@/components/layout/HomeLayout";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth-context";
+import { HostBankSetup } from "@/components/payment/HostBankSetup";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -77,6 +78,13 @@ export default function ProfilePage() {
             </Button>
           </div>
         </div>
+
+        {/* Bank details for hosts */}
+        {role === "host" && (
+          <div className="mb-6">
+            <HostBankSetup />
+          </div>
+        )}
       </div>
     </HomeLayout>
     </AuthGuard>

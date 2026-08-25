@@ -29,6 +29,11 @@ interface HostBooking {
   continue_notes: string | null;
   host_id: string;
   guest_id: string;
+  payment_status?: string;
+  transfer_status?: string;
+  transfer_id?: string;
+  platform_fee?: number;
+  host_payout?: number;
   listings: { title: string; image: string; location: string } | null;
 }
 
@@ -87,7 +92,15 @@ export default function DashboardPage() {
 
   const totalEarnings = bookings
     .filter((b) => b.status === "completed")
-    .reduce((sum, b) => sum + b.total_price, 0);
+    .reduce((sum, b) => sum + (b.host_payout || b.total_price), 0);
+
+  const pendingPayouts = bookings
+    .filter((b) => b.payment_status === "paid" && b.transfer_status === "pending")
+    .reduce((sum, b) => sum + (b.host_payout || 0), 0);
+
+  const processedPayouts = bookings
+    .filter((b) => b.transfer_status === "processed")
+    .reduce((sum, b) => sum + (b.host_payout || 0), 0);
 
   const activeListings = listings.filter((l) => l.status === "active").length;
   const pendingListings = listings.filter((l) => l.status === "pending").length;
@@ -112,11 +125,17 @@ export default function DashboardPage() {
             </div>
 
             {/* Stats cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
               <div className="bg-[#161929] border border-[#1e2235] rounded-xl p-5">
-                <p className="text-[10px] text-[#6b7280] tracking-widest font-semibold mb-3">NET EARNINGS</p>
+                <p className="text-[10px] text-[#6b7280] tracking-widest font-semibold mb-3">TOTAL EARNINGS</p>
                 <p className="font-heading text-3xl font-bold text-white">
-                  ${totalEarnings.toLocaleString()} <span className="text-sm text-[#6b7280] font-normal">USD</span>
+                  ₹{totalEarnings.toLocaleString()} <span className="text-sm text-[#6b7280] font-normal">INR</span>
+                </p>
+              </div>
+              <div className="bg-[#161929] border border-[#1e2235] rounded-xl p-5">
+                <p className="text-[10px] text-[#6b7280] tracking-widest font-semibold mb-3">PENDING PAYOUT</p>
+                <p className="font-heading text-3xl font-bold text-amber-400">
+                  ₹{pendingPayouts.toLocaleString()} <span className="text-sm text-[#6b7280] font-normal">INR</span>
                 </p>
               </div>
               <div className="bg-[#161929] border border-[#1e2235] rounded-xl p-5">
@@ -132,6 +151,59 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
+
+            {/* Payout History */}
+            {bookings.filter((b) => b.payment_status === "paid").length > 0 && (
+              <div className="mb-8">
+                <h2 className="font-heading text-lg font-bold text-white mb-4 tracking-wide border-l-4 border-purple-500 pl-3">
+                  PAYOUT HISTORY
+                </h2>
+                <div className="bg-[#161929] border border-[#1e2235] rounded-xl overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b border-[#1e2235]">
+                          <th className="text-left px-4 py-3 text-[10px] text-[#6b7280] tracking-widest font-semibold">DATE</th>
+                          <th className="text-left px-4 py-3 text-[10px] text-[#6b7280] tracking-widest font-semibold">LISTING</th>
+                          <th className="text-right px-4 py-3 text-[10px] text-[#6b7280] tracking-widest font-semibold">GUEST PAID</th>
+                          <th className="text-right px-4 py-3 text-[10px] text-[#6b7280] tracking-widest font-semibold">PLATFORM FEE</th>
+                          <th className="text-right px-4 py-3 text-[10px] text-[#6b7280] tracking-widest font-semibold">YOUR PAYOUT</th>
+                          <th className="text-center px-4 py-3 text-[10px] text-[#6b7280] tracking-widest font-semibold">STATUS</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bookings
+                          .filter((b) => b.payment_status === "paid")
+                          .map((b) => (
+                            <tr key={b.id} className="border-b border-[#1e2235]/50 hover:bg-white/[0.02]">
+                              <td className="px-4 py-3 text-[#a0aec0]">{new Date(b.booking_date).toLocaleDateString()}</td>
+                              <td className="px-4 py-3 text-white font-medium">{b.listings?.title || "—"}</td>
+                              <td className="px-4 py-3 text-right text-white">₹{b.total_price}</td>
+                              <td className="px-4 py-3 text-right text-[#6b7280]">-₹{b.platform_fee || 0}</td>
+                              <td className="px-4 py-3 text-right text-emerald-400 font-bold">₹{b.host_payout || 0}</td>
+                              <td className="px-4 py-3 text-center">
+                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest ${
+                                  b.transfer_status === "processed"
+                                    ? "bg-emerald-500/20 text-emerald-400"
+                                    : b.transfer_status === "pending"
+                                    ? "bg-amber-500/20 text-amber-400"
+                                    : b.transfer_status === "failed"
+                                    ? "bg-red-500/20 text-red-400"
+                                    : "bg-slate-500/20 text-slate-400"
+                                }`}>
+                                  {b.transfer_status === "processed" ? "SETTLED" :
+                                   b.transfer_status === "pending" ? "PROCESSING" :
+                                   b.transfer_status === "failed" ? "FAILED" : "NOT STARTED"}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Active Bookings with Session Controls */}
             {bookings.filter((b) => !["completed", "cancelled"].includes(b.status)).length > 0 && (
