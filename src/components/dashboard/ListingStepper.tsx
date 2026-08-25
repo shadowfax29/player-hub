@@ -249,7 +249,7 @@ export function ListingStepper() {
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">HOURLY RATE (INR)</label>
           <div className="flex items-center bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 gap-2">
-            <span className="text-[#6b7280] text-sm">$</span>
+            <span className="text-[#6b7280] text-sm">₹</span>
             <input
               type="number"
               value={form.hourlyRate}

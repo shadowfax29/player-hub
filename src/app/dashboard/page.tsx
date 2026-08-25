@@ -360,7 +360,7 @@ export default function DashboardPage() {
                         <p className="text-[10px] text-[#6b7280] mb-1">{listing.location}</p>
                         <div className="flex items-center justify-between">
                           <span className="text-cyan-400 text-xs font-bold">
-                            ${listing.price_per_hour}<span className="text-[#6b7280] font-normal">/hr</span>
+                            ₹{listing.price_per_hour}<span className="text-[#6b7280] font-normal">/hr</span>
                           </span>
                           <span className={`text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded ${
                             listing.status === "active" ? "bg-emerald-500/20 text-emerald-400" :
