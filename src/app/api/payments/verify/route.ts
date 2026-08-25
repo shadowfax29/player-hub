@@ -86,8 +86,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Invalid payment signature" }, { status: 400 });
   }
 
-  // Fetch booking to get host info and price
-  const { data: booking } = await supabase
+  // Fetch booking to get host info and price (use auth client for RLS)
+  const { data: booking } = await auth
     .from("bookings")
     .select("id, host_id, total_price")
     .eq("id", booking_id)
