@@ -3,17 +3,19 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Upload, Gamepad2, Home, Shield, Camera, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
+import { Upload, Gamepad2, Home, Shield, Camera, CheckCircle2, XCircle, RotateCcw, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { getSupabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/Toast";
 
 type Step = "details" | "documents" | "verify";
 
 export default function SignupPage() {
   const router = useRouter();
   const { signUp } = useAuth();
+  const { notify } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -23,6 +25,8 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [role, setRole] = useState<"guest" | "host">("guest");
   const [idType, setIdType] = useState("passport");
   const [idFile, setIdFile] = useState<File | null>(null);
@@ -38,7 +42,6 @@ export default function SignupPage() {
   const [step, setStep] = useState<Step>("details");
 
   // General state
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Cleanup camera on unmount
@@ -54,12 +57,11 @@ export default function SignupPage() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setError("File must be under 5MB");
+        notify("File must be under 5MB");
         return;
       }
       setIdFile(file);
       setIdFileName(file.name);
-      setError("");
       // Generate preview
       const reader = new FileReader();
       reader.onload = (ev) => setIdPreview(ev.target?.result as string);
@@ -68,7 +70,6 @@ export default function SignupPage() {
   };
 
   const startCamera = async () => {
-    setError("");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
@@ -77,7 +78,7 @@ export default function SignupPage() {
       streamRef.current = stream;
       setCameraActive(true);
     } catch {
-      setError("Camera access denied. Please allow camera permissions and try again.");
+      notify("Camera access denied. Please allow camera permissions and try again.");
     }
   };
 
@@ -123,15 +124,14 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
 
     if (step === "details") {
       if (password !== confirmPassword) {
-        setError("Passwords do not match");
+        notify("Passwords do not match");
         return;
       }
       if (password.length < 6) {
-        setError("Password must be at least 6 characters");
+        notify("Password must be at least 6 characters");
         return;
       }
       setStep("documents");
@@ -140,7 +140,7 @@ export default function SignupPage() {
 
     if (step === "documents") {
       if (!idFile) {
-        setError("Please upload a government ID document");
+        notify("Please upload a government ID document");
         return;
       }
       setStep("verify");
@@ -149,7 +149,7 @@ export default function SignupPage() {
 
     if (step === "verify") {
       if (!selfieBlob) {
-        setError("Please take a selfie to continue.");
+        notify("Please take a selfie to continue.");
         return;
       }
     }
@@ -163,7 +163,7 @@ export default function SignupPage() {
 
     if (result.error) {
       setLoading(false);
-      setError(result.error);
+      notify(result.error);
       return;
     }
 
@@ -171,7 +171,7 @@ export default function SignupPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
-      setError("Account created but could not verify user. Please log in.");
+      notify("Account created but could not verify user. Please log in.");
       return;
     }
 
@@ -280,12 +280,6 @@ export default function SignupPage() {
             <span className={cn("text-[9px] tracking-widest", stepIndex >= 2 ? "text-white" : "text-[#6b7280]")}>VERIFY</span>
           </div>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
-              <p className="text-red-400 text-xs">{error}</p>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* STEP 1: Account Details */}
             {step === "details" && (
@@ -332,16 +326,28 @@ export default function SignupPage() {
 
                 <div>
                   <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">PASSWORD</label>
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min 6 characters" required
-                    className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white placeholder-[#4a4d65] outline-none focus:border-cyan-400/50 transition-colors" />
+                  <div className="relative">
+                    <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Min 6 characters" required
+                      className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 pr-10 text-sm text-white placeholder-[#4a4d65] outline-none focus:border-cyan-400/50 transition-colors" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-white transition-colors">
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">CONFIRM PASSWORD</label>
-                  <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter password" required
-                    className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white placeholder-[#4a4d65] outline-none focus:border-cyan-400/50 transition-colors" />
+                  <div className="relative">
+                    <input type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Re-enter password" required
+                      className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 pr-10 text-sm text-white placeholder-[#4a4d65] outline-none focus:border-cyan-400/50 transition-colors" />
+                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-white transition-colors">
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
               </>
             )}

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { getSupabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
 
 const ADMIN_EMAIL = "admin@playconsole.com";
 const ADMIN_PASSWORD = "Admin@123";
@@ -13,26 +15,26 @@ const ADMIN_PASSWORD = "Admin@123";
 export default function LoginPage() {
   const router = useRouter();
   const { signIn } = useAuth();
+  const { notify } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     const result = await signIn(email, password);
     setLoading(false);
 
     if (result.error) {
-      setError(result.error);
+      notify(result.error);
     } else {
       const supabase = getSupabase();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setError("Could not verify account. Please try again.");
+        notify("Could not verify account. Please try again.");
         return;
       }
 
@@ -58,7 +60,7 @@ export default function LoginPage() {
 
       if (profile && !profile.verified) {
         await supabase.auth.signOut();
-        setError("Your account is pending verification. Please wait for your identity to be verified before logging in.");
+        notify("Your account is pending verification. Please wait for your identity to be verified before logging in.", "info");
         return;
       }
 
@@ -68,7 +70,6 @@ export default function LoginPage() {
   };
 
   const handleAdminLogin = async () => {
-    setError("");
     setLoading(true);
 
     // First try to sign up the admin if they don't exist
@@ -88,7 +89,8 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result.error) {
-      setError(result.error);
+      notify(result.error);
+      setLoading(false);
       return;
     }
 
@@ -130,12 +132,6 @@ export default function LoginPage() {
             Log in to access your gaming sessions
           </p>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
-              <p className="text-red-400 text-xs">{error}</p>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">EMAIL</label>
@@ -151,14 +147,23 @@ export default function LoginPage() {
 
             <div>
               <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">PASSWORD</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-                className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white placeholder-[#4a4d65] outline-none focus:border-cyan-400/50 transition-colors"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 pr-10 text-sm text-white placeholder-[#4a4d65] outline-none focus:border-cyan-400/50 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
 
             <Button
