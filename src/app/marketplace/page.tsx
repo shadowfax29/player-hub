@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MapPin, Calendar, Search, X } from "lucide-react";
+import { MapPin, Search, X } from "lucide-react";
 import { HomeLayout } from "@/components/layout/HomeLayout";
 import { ListingCard } from "@/components/marketplace/ListingCard";
 import { Button } from "@/components/ui/Button";
+import { ThemedSelect } from "@/components/ui/ThemedSelect";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { cn } from "@/lib/utils";
 import type { Listing } from "@/lib/types";
 
@@ -15,6 +17,22 @@ const categories = [
   { label: "CONSOLE PRIVATE ROOMS", value: "console" },
   { label: "RETRO ARCADE", value: "arcade" },
 ] as const;
+
+const cities = [
+  { label: "All Cities", value: "" },
+  { label: "Mumbai", value: "Mumbai" },
+  { label: "Delhi", value: "Delhi" },
+  { label: "Bangalore", value: "Bangalore" },
+  { label: "Hyderabad", value: "Hyderabad" },
+  { label: "Chennai", value: "Chennai" },
+  { label: "Pune", value: "Pune" },
+  { label: "Kolkata", value: "Kolkata" },
+  { label: "Ahmedabad", value: "Ahmedabad" },
+  { label: "Jaipur", value: "Jaipur" },
+  { label: "Lucknow", value: "Lucknow" },
+  { label: "Chandigarh", value: "Chandigarh" },
+  { label: "Goa", value: "Goa" },
+];
 
 type CategoryValue = typeof categories[number]["value"];
 
@@ -63,38 +81,20 @@ export default function MarketplacePage() {
 
         {/* Search bar */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
-          <div className="flex items-center gap-3 bg-[#161929] border border-[#1e2235] rounded-lg px-4 py-3 flex-1 sm:max-w-xs focus-within:border-cyan-400/50 transition-colors">
-            <MapPin size={16} className="text-cyan-400 shrink-0" />
-            <input
-              type="text"
-              value={locationQuery}
-              onChange={(e) => {
-                setLocationQuery(e.target.value);
-                if (searchApplied) setSearchApplied(true);
-              }}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="Search by location"
-              className="bg-transparent text-sm text-white placeholder-[#6b7280] outline-none w-full"
-            />
-            {locationQuery && (
-              <button onClick={() => { setLocationQuery(""); if (searchApplied) setSearchApplied(true); }} className="text-[#6b7280] hover:text-white transition-colors">
-                <X size={14} />
-              </button>
-            )}
-          </div>
+          <ThemedSelect
+            options={cities}
+            value={locationQuery}
+            onChange={(val) => { setLocationQuery(val); if (searchApplied) setSearchApplied(true); }}
+            placeholder="Select city"
+            icon={<MapPin size={16} className="text-cyan-400" />}
+            className="flex-1 sm:max-w-xs"
+          />
 
-          <div className="flex items-center gap-3 bg-[#161929] border border-[#1e2235] rounded-lg px-4 py-3 flex-1 sm:max-w-xs focus-within:border-cyan-400/50 transition-colors">
-            <Calendar size={16} className="text-cyan-400 shrink-0" />
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => {
-                setDate(e.target.value);
-                if (searchApplied) setSearchApplied(true);
-              }}
-              className="bg-transparent text-sm text-white outline-none w-full [color-scheme:dark]"
-            />
-          </div>
+          <DatePicker
+            value={date}
+            onChange={(val) => { setDate(val); if (searchApplied) setSearchApplied(true); }}
+            className="flex-1 sm:max-w-xs"
+          />
 
           <Button variant="primary" size="md" className="px-8 tracking-widest gap-2" onClick={handleSearch}>
             <Search size={14} />
