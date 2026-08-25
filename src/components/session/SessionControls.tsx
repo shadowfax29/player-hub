@@ -183,6 +183,7 @@ export function SessionControls({ booking, userId, onBookingUpdate }: SessionCon
 
   // ── AWAITING CONFIRMATION (one party confirmed end) ──
   if (booking.status === "awaiting_confirmation") {
+    const iConfirmed = isHost ? booking.host_confirmed_end : booking.guest_confirmed_end;
     const otherConfirmed = isHost ? booking.guest_confirmed_end : booking.host_confirmed_end;
     return (
       <div className="space-y-3">
@@ -192,10 +193,12 @@ export function SessionControls({ booking, userId, onBookingUpdate }: SessionCon
             <p className="text-[10px] text-amber-400 tracking-widest font-bold">AWAITING CONFIRMATION</p>
           </div>
           <p className="text-[#a0aec0] text-xs">
-            {otherConfirmed ? "Both parties confirmed. Session will move to review phase." : "Waiting for the other party to confirm session end."}
+            {iConfirmed
+              ? otherConfirmed ? "Both parties confirmed. Session will move to review phase." : "You confirmed end. Waiting for the other party."
+              : "Waiting for you to confirm session end."}
           </p>
         </div>
-        {!otherConfirmed && (
+        {!iConfirmed && (
           <Button variant="cyan" size="lg" className="w-full tracking-widest" onClick={() => callSession("confirm_end")} disabled={loading}>
             {loading ? "CONFIRMING..." : "CONFIRM SESSION END"}
           </Button>
