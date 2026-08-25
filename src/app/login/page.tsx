@@ -173,7 +173,7 @@ export default function LoginPage() {
           </form>
 
           {/* Admin Quick Login */}
-          <div className="mt-6 pt-6 border-t border-[#1e2235]">
+          {/* <div className="mt-6 pt-6 border-t border-[#1e2235]">
             <button
               onClick={handleAdminLogin}
               disabled={loading}
@@ -185,7 +185,7 @@ export default function LoginPage() {
               {loading ? "SETTING UP ADMIN..." : "ADMIN LOGIN"}
             </button>
             <p className="text-[10px] text-[#4a4d65] text-center mt-2">Default: admin@playconsole.com</p>
-          </div>
+          </div> */}
 
           <p className="text-center text-sm text-[#6b7280] mt-6">
             Don&apos;t have an account?{" "}
