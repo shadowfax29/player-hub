@@ -7,16 +7,7 @@ import { ListingCard } from "@/components/marketplace/ListingCard";
 import { Button } from "@/components/ui/Button";
 import { ThemedSelect } from "@/components/ui/ThemedSelect";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { cn } from "@/lib/utils";
 import type { Listing } from "@/lib/types";
-
-const categories = [
-  { label: "ALL EXPERIENCES", value: "all" },
-  { label: "PRO PC LOUNGES", value: "pc" },
-  { label: "VR ARENAS", value: "vr" },
-  { label: "CONSOLE PRIVATE ROOMS", value: "console" },
-  { label: "RETRO ARCADE", value: "arcade" },
-] as const;
 
 const cities = [
   { label: "All Cities", value: "" },
@@ -34,10 +25,7 @@ const cities = [
   { label: "Goa", value: "Goa" },
 ];
 
-type CategoryValue = typeof categories[number]["value"];
-
 export default function MarketplacePage() {
-  const [activeCategory, setActiveCategory] = useState<CategoryValue>("all");
   const [locationQuery, setLocationQuery] = useState("");
   const [date, setDate] = useState("");
   const [searchApplied, setSearchApplied] = useState(false);
@@ -46,7 +34,6 @@ export default function MarketplacePage() {
 
   useEffect(() => {
     const params = new URLSearchParams();
-    if (activeCategory !== "all") params.set("category", activeCategory);
     if (searchApplied && locationQuery.trim()) params.set("location", locationQuery.trim());
 
     setLoading(true);
@@ -55,7 +42,7 @@ export default function MarketplacePage() {
       .then((data) => setListings(data.listings || []))
       .catch(() => setListings([]))
       .finally(() => setLoading(false));
-  }, [activeCategory, locationQuery, searchApplied]);
+  }, [locationQuery, searchApplied]);
 
   const handleSearch = () => {
     setSearchApplied(true);
@@ -112,24 +99,6 @@ export default function MarketplacePage() {
             </button>
           </div>
         )}
-
-        {/* Category pills */}
-        <div className="flex items-center gap-2 mb-8 flex-wrap">
-          {categories.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => setActiveCategory(cat.value)}
-              className={cn(
-                "px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all border",
-                activeCategory === cat.value
-                  ? "bg-purple-600 border-purple-500 text-white"
-                  : "bg-transparent border-[#2a2d45] text-[#6b7280] hover:border-purple-500/50 hover:text-white"
-              )}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
 
         {/* Listings grid */}
         {loading ? (
