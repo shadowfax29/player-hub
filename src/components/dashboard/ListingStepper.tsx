@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Check, ChevronRight, ChevronLeft, Plus, X, Upload, MapPin, Gamepad2, Camera, Clock, Shield, Loader2, CreditCard } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Check, ChevronRight, ChevronLeft, Plus, X, Upload, MapPin, Gamepad2, Camera, Clock, Shield, Loader2, CreditCard, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { ThemedSelect } from "@/components/ui/ThemedSelect";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { getSupabase } from "@/lib/supabase";
@@ -154,15 +155,41 @@ export function ListingStepper() {
     updateField("games", form.games.filter((g) => g !== game));
   };
 
-  const addPhoto = () => {
-    const placeholders = [
-      "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&q=80",
-      "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&q=80",
-      "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=400&q=80",
-      "https://images.unsplash.com/photo-1598550476439-6847785fcea6?w=400&q=80",
-    ];
-    const url = placeholders[form.photos.length % placeholders.length];
-    updateField("photos", [...form.photos, url]);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size must be under 5MB");
+      return;
+    }
+
+    setPhotoUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const filePath = `${user.id}/listing-photos/${Date.now()}.${ext}`;
+      const supabase = getSupabase();
+      const { error } = await supabase.storage
+        .from("listing-photos")
+        .upload(filePath, file, { contentType: file.type, upsert: false });
+      if (error) throw error;
+
+      const { data } = supabase.storage.from("listing-photos").getPublicUrl(filePath);
+      updateField("photos", [...form.photos, data.publicUrl]);
+    } catch (err) {
+      console.error("Photo upload failed:", err);
+      alert("Failed to upload photo. Please try again.");
+    } finally {
+      setPhotoUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const removePhoto = (index: number) => {
@@ -258,15 +285,11 @@ export function ListingStepper() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">CATEGORY</label>
-          <select
+          <ThemedSelect
+            options={CATEGORIES}
             value={form.category}
-            onChange={(e) => updateField("category", e.target.value)}
-            className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white outline-none appearance-none cursor-pointer"
-          >
-            {CATEGORIES.map((cat) => (
-              <option key={cat.value} value={cat.value}>{cat.label}</option>
-            ))}
-          </select>
+            onChange={(v) => updateField("category", v)}
+          />
         </div>
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">HOURLY RATE (INR)</label>
@@ -312,41 +335,29 @@ export function ListingStepper() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">HARDWARE</label>
-          <select
+          <ThemedSelect
+            options={HARDWARE_OPTIONS.map((opt) => ({ label: opt, value: opt }))}
             value={form.hardware}
-            onChange={(e) => updateField("hardware", e.target.value)}
-            className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white outline-none appearance-none cursor-pointer"
-          >
-            {HARDWARE_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
+            onChange={(v) => updateField("hardware", v)}
+          />
         </div>
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">TV / MONITOR SIZE</label>
-          <select
+          <ThemedSelect
+            options={['32"', '43"', '50"', '55"', '65"', '75"', '24" Monitor', '27" Monitor', '32" Ultrawide'].map((opt) => ({ label: opt, value: opt }))}
             value={form.tvSize}
-            onChange={(e) => updateField("tvSize", e.target.value)}
-            className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white outline-none appearance-none cursor-pointer"
-          >
-            {['32"', '43"', '50"', '55"', '65"', '75"', '24" Monitor', '27" Monitor', '32" Ultrawide'].map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
+            onChange={(v) => updateField("tvSize", v)}
+          />
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">INTERNET SPEED</label>
-          <select
+          <ThemedSelect
+            options={["100 Mbps", "200 Mbps", "300 Mbps", "500 Mbps", "1 Gbps", "2 Gbps"].map((opt) => ({ label: opt, value: opt }))}
             value={form.internetSpeed}
-            onChange={(e) => updateField("internetSpeed", e.target.value)}
-            className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white outline-none appearance-none cursor-pointer"
-          >
-            {["100 Mbps", "200 Mbps", "300 Mbps", "500 Mbps", "1 Gbps", "2 Gbps"].map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
+            onChange={(v) => updateField("internetSpeed", v)}
+          />
         </div>
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">CONSOLE MODEL / SERIAL</label>
@@ -410,15 +421,29 @@ export function ListingStepper() {
         ))}
         {form.photos.length < 10 && (
           <button
-            onClick={addPhoto}
-            className="aspect-video bg-[#1a1d2e] border-2 border-dashed border-[#2a2d45] rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-purple-500/50 transition-colors"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={photoUploading}
+            className="aspect-video bg-[#1a1d2e] border-2 border-dashed border-[#2a2d45] rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-purple-500/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Upload size={24} className="text-[#6b7280]" />
-            <span className="text-[9px] text-[#6b7280] tracking-widest">UPLOAD PHOTO</span>
+            {photoUploading ? (
+              <Loader2 size={24} className="text-purple-400 animate-spin" />
+            ) : (
+              <ImagePlus size={24} className="text-[#6b7280]" />
+            )}
+            <span className="text-[9px] text-[#6b7280] tracking-widest">
+              {photoUploading ? "UPLOADING..." : "UPLOAD PHOTO"}
+            </span>
           </button>
         )}
       </div>
-      <p className="text-[10px] text-[#4a4d65] tracking-wide">Minimum 3 photos required. Max 10. JPG, PNG, or WebP. Max 5MB each.</p>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handlePhotoUpload}
+      />
+      <p className="text-[10px] text-[#4a4d65] tracking-wide">Minimum 3 photos required. Max 10. JPG, PNG, or WebP. Max 5MB each. First photo becomes the cover.</p>
     </div>
   );
 
@@ -466,27 +491,19 @@ export function ListingStepper() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">MIN BOOKING (HOURS)</label>
-          <select
+          <ThemedSelect
+            options={[1, 2, 3, 4].map((v) => ({ label: `${v} Hour${v > 1 ? "s" : ""}`, value: String(v) }))}
             value={form.minBooking}
-            onChange={(e) => updateField("minBooking", e.target.value)}
-            className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white outline-none appearance-none cursor-pointer"
-          >
-            {[1, 2, 3, 4].map((v) => (
-              <option key={v} value={v}>{v} Hour{v > 1 ? "s" : ""}</option>
-            ))}
-          </select>
+            onChange={(v) => updateField("minBooking", v)}
+          />
         </div>
         <div>
           <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">MAX BOOKING (HOURS)</label>
-          <select
+          <ThemedSelect
+            options={[4, 6, 8, 12, 24].map((v) => ({ label: `${v} Hours`, value: String(v) }))}
             value={form.maxBooking}
-            onChange={(e) => updateField("maxBooking", e.target.value)}
-            className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white outline-none appearance-none cursor-pointer"
-          >
-            {[4, 6, 8, 12, 24].map((v) => (
-              <option key={v} value={v}>{v} Hours</option>
-            ))}
-          </select>
+            onChange={(v) => updateField("maxBooking", v)}
+          />
         </div>
       </div>
     </div>
@@ -509,15 +526,11 @@ export function ListingStepper() {
 
       <div>
         <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-2">GOVERNMENT ID TYPE</label>
-        <select
+        <ThemedSelect
+          options={ID_TYPES}
           value={form.idType}
-          onChange={(e) => updateField("idType", e.target.value)}
-          className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white outline-none appearance-none cursor-pointer"
-        >
-          {ID_TYPES.map((t) => (
-            <option key={t.value} value={t.value}>{t.label}</option>
-          ))}
-        </select>
+          onChange={(v) => updateField("idType", v)}
+        />
       </div>
 
       <div>
