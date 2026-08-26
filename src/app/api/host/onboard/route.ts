@@ -8,6 +8,11 @@ const supabase = createClient(
 
 const RAZORPAY_API = "https://api.razorpay.com/v1";
 
+const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
+const IFSC_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+const PHONE_REGEX = /^[6-9]\d{9}$/;
+const ACCOUNT_REGEX = /^\d{9,18}$/;
+
 async function razorpayAuth() {
   return "Basic " + Buffer.from(`${process.env.RAZORPAY_KEY_ID}:${process.env.RAZORPAY_KEY_SECRET}`).toString("base64");
 }
@@ -41,6 +46,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "All fields are required" }, { status: 400 });
   }
 
+  const cleanPhone = phone.replace(/[^0-9]/g, "");
+  const cleanPan = pan_number.toUpperCase();
+  const cleanIfsc = bank_ifsc.toUpperCase();
+
+  if (!PHONE_REGEX.test(cleanPhone)) {
+    return NextResponse.json({ error: "Invalid phone number. Enter a valid 10-digit Indian mobile number." }, { status: 400 });
+  }
+  if (!PAN_REGEX.test(cleanPan)) {
+    return NextResponse.json({ error: "Invalid PAN number. Format: ABCDE1234F" }, { status: 400 });
+  }
+  if (!ACCOUNT_REGEX.test(bank_account_number)) {
+    return NextResponse.json({ error: "Invalid account number. Must be 9-18 digits." }, { status: 400 });
+  }
+  if (!IFSC_REGEX.test(cleanIfsc)) {
+    return NextResponse.json({ error: "Invalid IFSC code. Format: SBIN0001234" }, { status: 400 });
+  }
+  if (bank_holder_name.trim().length < 3) {
+    return NextResponse.json({ error: "Account holder name must be at least 3 characters." }, { status: 400 });
+  }
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("razorpay_account_id, kyc_status")
@@ -64,11 +89,11 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           email,
           contact_name: full_name,
-          phone: phone.replace(/[^0-9]/g, ""),
+          phone: cleanPhone,
           profile: { category: "services", subcategory: "gaming" },
           legal_business_name: full_name,
           business_type: "individual",
-          legal_info: { pan: pan_number },
+          legal_info: { pan: cleanPan },
           type: "route",
         }),
       });
@@ -85,9 +110,9 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           name: full_name,
           email,
-          phone: { primary: phone.replace(/[^0-9]/g, "") },
+          phone: { primary: cleanPhone },
           relationship: { director: true },
-          kyc_details: { pan: pan_number },
+          kyc_details: { pan: cleanPan },
         }),
       });
     } catch {
@@ -117,7 +142,7 @@ export async function POST(request: NextRequest) {
           body: JSON.stringify({
             route: {
               bank_account: {
-                ifsc: bank_ifsc,
+                ifsc: cleanIfsc,
                 account_number: bank_account_number,
                 beneficiary_name: bank_holder_name,
               },
@@ -135,9 +160,9 @@ export async function POST(request: NextRequest) {
       .update({
         razorpay_account_id: accountId,
         bank_account_number,
-        bank_ifsc,
-        bank_holder_name,
-        pan_number,
+        bank_ifsc: cleanIfsc,
+        bank_holder_name: bank_holder_name.trim(),
+        pan_number: cleanPan,
         kyc_status: "submitted",
       })
       .eq("id", user.id);

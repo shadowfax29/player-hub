@@ -5,6 +5,19 @@ import { CreditCard, CheckCircle, AlertCircle, Loader2, Building2 } from "lucide
 import { Button } from "@/components/ui/Button";
 import { getSupabase } from "@/lib/supabase";
 
+const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
+const IFSC_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+const PHONE_REGEX = /^[6-9]\d{9}$/;
+const ACCOUNT_REGEX = /^\d{9,18}$/;
+
+interface ValidationErrors {
+  phone?: string;
+  pan_number?: string;
+  bank_account_number?: string;
+  bank_ifsc?: string;
+  bank_holder_name?: string;
+}
+
 export function HostBankSetup() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -12,6 +25,7 @@ export function HostBankSetup() {
   const [kycStatus, setKycStatus] = useState<string>("pending");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<ValidationErrors>({});
 
   const [form, setForm] = useState({
     full_name: "",
@@ -53,10 +67,36 @@ export function HostBankSetup() {
     }
   }
 
+  function validate(): boolean {
+    const errors: ValidationErrors = {};
+
+    if (!PHONE_REGEX.test(form.phone.replace(/[^0-9]/g, ""))) {
+      errors.phone = "Enter a valid 10-digit Indian mobile number";
+    }
+    if (!PAN_REGEX.test(form.pan_number.toUpperCase())) {
+      errors.pan_number = "Enter a valid PAN (e.g. ABCDE1234F)";
+    }
+    if (!ACCOUNT_REGEX.test(form.bank_account_number)) {
+      errors.bank_account_number = "Account number must be 9-18 digits";
+    }
+    if (!IFSC_REGEX.test(form.bank_ifsc.toUpperCase())) {
+      errors.bank_ifsc = "Enter a valid IFSC (e.g. SBIN0001234)";
+    }
+    if (form.bank_holder_name.trim().length < 3) {
+      errors.bank_holder_name = "Enter the account holder's full name";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    if (!validate()) return;
+
     setSubmitting(true);
 
     try {
@@ -70,7 +110,12 @@ export function HostBankSetup() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          phone: form.phone.replace(/[^0-9]/g, ""),
+          pan_number: form.pan_number.toUpperCase(),
+          bank_ifsc: form.bank_ifsc.toUpperCase(),
+        }),
       });
 
       const data = await res.json();
@@ -176,10 +221,13 @@ export function HostBankSetup() {
               type="tel"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              placeholder="+91 98765 43210"
-              className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-[#6b7280] focus:border-purple-500 focus:outline-none"
+              placeholder="98765 43210"
+              className={`w-full bg-[#1a1d2e] border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-[#6b7280] focus:outline-none ${
+                fieldErrors.phone ? "border-red-500/50 focus:border-red-500" : "border-[#2a2d45] focus:border-purple-500"
+              }`}
               required
             />
+            {fieldErrors.phone && <p className="text-[10px] text-red-400 mt-1">{fieldErrors.phone}</p>}
           </div>
           <div>
             <label className="block text-[10px] text-[#6b7280] tracking-widest font-semibold mb-1.5">PAN NUMBER</label>
@@ -189,9 +237,12 @@ export function HostBankSetup() {
               onChange={(e) => setForm({ ...form, pan_number: e.target.value.toUpperCase() })}
               placeholder="ABCDE1234F"
               maxLength={10}
-              className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-[#6b7280] focus:border-purple-500 focus:outline-none uppercase"
+              className={`w-full bg-[#1a1d2e] border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-[#6b7280] focus:outline-none uppercase ${
+                fieldErrors.pan_number ? "border-red-500/50 focus:border-red-500" : "border-[#2a2d45] focus:border-purple-500"
+              }`}
               required
             />
+            {fieldErrors.pan_number && <p className="text-[10px] text-red-400 mt-1">{fieldErrors.pan_number}</p>}
           </div>
         </div>
 
@@ -205,12 +256,16 @@ export function HostBankSetup() {
               <label className="block text-[10px] text-[#6b7280] tracking-widest font-semibold mb-1.5">ACCOUNT NUMBER</label>
               <input
                 type="text"
+                inputMode="numeric"
                 value={form.bank_account_number}
-                onChange={(e) => setForm({ ...form, bank_account_number: e.target.value })}
+                onChange={(e) => setForm({ ...form, bank_account_number: e.target.value.replace(/[^0-9]/g, "") })}
                 placeholder="1234567890"
-                className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-[#6b7280] focus:border-purple-500 focus:outline-none"
+                className={`w-full bg-[#1a1d2e] border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-[#6b7280] focus:outline-none ${
+                  fieldErrors.bank_account_number ? "border-red-500/50 focus:border-red-500" : "border-[#2a2d45] focus:border-purple-500"
+                }`}
                 required
               />
+              {fieldErrors.bank_account_number && <p className="text-[10px] text-red-400 mt-1">{fieldErrors.bank_account_number}</p>}
             </div>
             <div>
               <label className="block text-[10px] text-[#6b7280] tracking-widest font-semibold mb-1.5">IFSC CODE</label>
@@ -220,9 +275,12 @@ export function HostBankSetup() {
                 onChange={(e) => setForm({ ...form, bank_ifsc: e.target.value.toUpperCase() })}
                 placeholder="SBIN0001234"
                 maxLength={11}
-                className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-[#6b7280] focus:border-purple-500 focus:outline-none uppercase"
+                className={`w-full bg-[#1a1d2e] border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-[#6b7280] focus:outline-none uppercase ${
+                  fieldErrors.bank_ifsc ? "border-red-500/50 focus:border-red-500" : "border-[#2a2d45] focus:border-purple-500"
+                }`}
                 required
               />
+              {fieldErrors.bank_ifsc && <p className="text-[10px] text-red-400 mt-1">{fieldErrors.bank_ifsc}</p>}
             </div>
           </div>
           <div className="mt-4">
@@ -232,9 +290,12 @@ export function HostBankSetup() {
               value={form.bank_holder_name}
               onChange={(e) => setForm({ ...form, bank_holder_name: e.target.value })}
               placeholder="As per bank records"
-              className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-[#6b7280] focus:border-purple-500 focus:outline-none"
+              className={`w-full bg-[#1a1d2e] border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-[#6b7280] focus:outline-none ${
+                fieldErrors.bank_holder_name ? "border-red-500/50 focus:border-red-500" : "border-[#2a2d45] focus:border-purple-500"
+              }`}
               required
             />
+            {fieldErrors.bank_holder_name && <p className="text-[10px] text-red-400 mt-1">{fieldErrors.bank_holder_name}</p>}
           </div>
         </div>
 
