@@ -47,9 +47,9 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
               <Image
                 src="/Play-removebg-preview.png"
                 alt="PlayConsole"
-                width={140}
-                height={40}
-                className="h-8 w-auto"
+                width={200}
+                height={60}
+                className="h-12 w-auto"
                 priority
               />
             </Link>
