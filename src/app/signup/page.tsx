@@ -2,11 +2,13 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Upload, Gamepad2, Home, Shield, Camera, CheckCircle2, XCircle, RotateCcw, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { getSupabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
+import { ThemedSelect } from "@/components/ui/ThemedSelect";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 
@@ -258,10 +260,15 @@ export default function SignupPage() {
 
       <div className="relative z-10 w-full max-w-md">
         {/* Logo */}
-        <Link href="/" className="block text-center mb-8">
-          <span className="text-3xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-[#b0c6ff] to-[#5203d5] font-headline">
-            PlayConsole
-          </span>
+        <Link href="/" className="flex justify-center mb-8">
+          <Image
+            src="/Play-removebg-preview.png"
+            alt="PlayConsole"
+            width={200}
+            height={60}
+            className="h-12 w-auto"
+            priority
+          />
         </Link>
 
         <div className="bg-[#161929] border border-[#1e2235] rounded-2xl p-6 md:p-8">
@@ -382,13 +389,16 @@ export default function SignupPage() {
 
                 <div>
                   <label className="text-[10px] text-[#6b7280] tracking-widest font-semibold block mb-1.5">DOCUMENT TYPE</label>
-                  <select value={idType} onChange={(e) => setIdType(e.target.value)}
-                    className="w-full bg-[#1a1d2e] border border-[#2a2d45] rounded-lg px-4 py-3 text-sm text-white outline-none appearance-none cursor-pointer">
-                    <option value="passport">Passport</option>
-                    <option value="drivers_license">Driver&apos;s License</option>
-                    <option value="national_id">National ID Card</option>
-                    <option value="aadhaar">Aadhaar Card</option>
-                  </select>
+                  <ThemedSelect
+                    options={[
+                      { value: "passport", label: "Passport" },
+                      { value: "drivers_license", label: "Driver's License" },
+                      { value: "national_id", label: "National ID Card" },
+                      { value: "aadhaar", label: "Aadhaar Card" },
+                    ]}
+                    value={idType}
+                    onChange={setIdType}
+                  />
                 </div>
 
                 <div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -118,10 +119,15 @@ export default function LoginPage() {
 
       <div className="relative z-10 w-full max-w-md">
         {/* Logo */}
-        <Link href="/" className="block text-center mb-8">
-          <span className="text-3xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-[#b0c6ff] to-[#5203d5] font-headline">
-            PlayConsole
-          </span>
+        <Link href="/" className="flex justify-center mb-8">
+          <Image
+            src="/Play-removebg-preview.png"
+            alt="PlayConsole"
+            width={200}
+            height={60}
+            className="h-12 w-auto"
+            priority
+          />
         </Link>
 
         <div className="bg-[#161929] border border-[#1e2235] rounded-2xl p-8">
