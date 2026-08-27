@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
@@ -42,8 +43,15 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
         <div className="flex items-center justify-between px-8 py-4 w-full max-w-screen-2xl mx-auto">
           {/* Left: logo + nav links */}
           <div className="flex items-center gap-8">
-            <Link href="/" className="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-[#b0c6ff] to-[#5203d5] font-headline">
-              PlayConsole
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/Play-removebg-preview.png"
+                alt="PlayConsole"
+                width={140}
+                height={40}
+                className="h-8 w-auto"
+                priority
+              />
             </Link>
             <div className="hidden md:flex gap-6 font-headline uppercase tracking-wider text-sm">
               {!loading && topLinks.map(({ label, href }) => {

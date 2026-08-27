@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export function SplashLoader({ onComplete }: { onComplete: () => void }) {
   const [progress, setProgress] = useState(0);
@@ -35,11 +36,15 @@ export function SplashLoader({ onComplete }: { onComplete: () => void }) {
       }`}
     >
       {/* Logo */}
-      <div className="mb-10 animate-pulse">
-        <h1 className="font-heading text-4xl md:text-5xl font-extrabold tracking-widest">
-          <span className="text-purple-400">PLAY</span>
-          <span className="text-white ml-2">CONSOLE</span>
-        </h1>
+      <div className="mb-10">
+        <Image
+          src="/Play-removebg-preview.png"
+          alt="PlayConsole"
+          width={280}
+          height={80}
+          className="h-16 w-auto animate-pulse"
+          priority
+        />
       </div>
 
       {/* Progress bar */}
