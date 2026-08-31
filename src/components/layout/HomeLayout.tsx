@@ -43,15 +43,18 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
         <div className="flex items-center justify-between px-8 py-4 w-full max-w-screen-2xl mx-auto">
           {/* Left: logo + nav links */}
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex flex-col items-center">
               <Image
                 src="/logo.png"
                 alt="PlayConsole"
                 width={200}
                 height={60}
-                className="h-12 w-auto"
+                className="h-10 w-auto"
                 priority
               />
+              <span className="text-[8px] font-bold tracking-[0.3em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 uppercase mt-0.5">
+                PlayConsole
+              </span>
             </Link>
             <div className="hidden md:flex gap-6 font-headline uppercase tracking-wider text-sm">
               {!loading && topLinks.map(({ label, href }) => {
