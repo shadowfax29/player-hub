@@ -121,7 +121,7 @@ export default function LoginPage() {
         {/* Logo */}
         <Link href="/" className="flex justify-center mb-8">
           <Image
-            src="/Play-removebg-preview.png"
+            src="/logo.png"
             alt="PlayConsole"
             width={200}
             height={60}

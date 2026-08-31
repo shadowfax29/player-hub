@@ -38,7 +38,7 @@ export function SplashLoader({ onComplete }: { onComplete: () => void }) {
       {/* Logo */}
       <div className="mb-10">
         <Image
-          src="/Play-removebg-preview.png"
+          src="/logo.png"
           alt="PlayConsole"
           width={280}
           height={80}

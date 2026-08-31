@@ -45,7 +45,7 @@ export function HomeLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center">
               <Image
-                src="/Play-removebg-preview.png"
+                src="/logo.png"
                 alt="PlayConsole"
                 width={200}
                 height={60}

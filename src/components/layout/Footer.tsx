@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -7,8 +8,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="md:col-span-1">
-            <Link href="/" className="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-[#b0c6ff] to-[#5203d5] font-headline">
-              PlayConsole
+            <Link href="/" className="inline-block">
+              <Image
+                src="/logo.png"
+                alt="PlayConsole"
+                width={120}
+                height={40}
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="text-[#6b7280] text-xs mt-3 leading-relaxed">
               The ultimate gaming marketplace. Find, book, and play at premium gaming setups near you.
