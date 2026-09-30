@@ -282,17 +282,46 @@ export default function ListingDetailPage() {
           {/* Featured games */}
           {listing.featured_games && listing.featured_games.length > 0 && (
             <div className="mb-8">
-              <h2 className="font-heading text-xl font-bold text-white mb-4 tracking-wide">LIBRARY HIGHLIGHTS</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-heading text-xl font-bold text-white tracking-wide border-l-4 border-purple-500 pl-3">
+                  LIBRARY HIGHLIGHTS
+                </h2>
+                <span className="text-[10px] text-[#6b7280] tracking-widest">
+                  {listing.featured_games.length} {listing.featured_games.length === 1 ? "TITLE" : "TITLES"}
+                </span>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {listing.featured_games.slice(0, 4).map((game) => (
-                  <div key={game} className="flex items-center gap-3 bg-[#161929] border border-[#1e2235] rounded-lg p-3">
-                    <div className="w-10 h-10 rounded bg-gradient-to-br from-purple-900 to-blue-700 shrink-0" />
-                    <div>
-                      <p className="text-sm font-semibold text-white">{game}</p>
+                {listing.featured_games.slice(0, 4).map((game, i) => (
+                  <div
+                    key={game}
+                    className="group flex items-center gap-3.5 bg-[#161929] border border-[#1e2235] rounded-xl p-3.5 hover:border-purple-500/40 hover:bg-[#1a1d33] transition-all"
+                  >
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-500 flex items-center justify-center shadow-lg shadow-purple-900/30">
+                      <span className="font-heading text-lg font-extrabold text-white/90 drop-shadow">
+                        {game.charAt(0).toUpperCase()}
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                     </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-white truncate group-hover:text-purple-300 transition-colors">
+                        {game}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                        <span className="text-[9px] text-[#6b7280] tracking-widest">PRE-INSTALLED</span>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-bold text-[#4a4d65] tracking-widest shrink-0 group-hover:text-purple-400 transition-colors">
+                      0{i + 1}
+                    </span>
                   </div>
                 ))}
               </div>
+              {listing.featured_games.length > 4 && (
+                <p className="text-[10px] text-[#4a4d65] tracking-widest mt-3 text-center">
+                  + {listing.featured_games.length - 4} MORE IN THE LIBRARY
+                </p>
+              )}
             </div>
           )}
 
