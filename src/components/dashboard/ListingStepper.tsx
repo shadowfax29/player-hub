@@ -121,7 +121,7 @@ export function ListingStepper() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        setHasBankDetails(data.hasBankDetails || data.onboarded);
+        setHasBankDetails(true); // Temporarily set to true to make bank details non-mandatory
       } catch {
         setHasBankDetails(false);
       } finally {
@@ -633,30 +633,30 @@ export function ListingStepper() {
     </div>
   );
 
-  if (!bankChecked) {
-    return (
-      <div className="bg-[#161929] border border-[#1e2235] rounded-xl p-8 text-center">
-        <Loader2 size={24} className="text-cyan-400 mx-auto mb-3 animate-spin" />
-        <p className="text-[#6b7280] text-sm">Checking bank details...</p>
-      </div>
-    );
-  }
+  // if (!bankChecked) {
+  //   return (
+  //     <div className="bg-[#161929] border border-[#1e2235] rounded-xl p-8 text-center">
+  //       <Loader2 size={24} className="text-cyan-400 mx-auto mb-3 animate-spin" />
+  //       <p className="text-[#6b7280] text-sm">Checking bank details...</p>
+  //     </div>
+  //   );
+  // }
 
-  if (!hasBankDetails) {
-    return (
-      <div className="bg-[#161929] border border-amber-500/30 rounded-xl p-8 text-center">
-        <CreditCard size={32} className="text-amber-400 mx-auto mb-4" />
-        <h3 className="font-heading text-lg font-bold text-white tracking-wide mb-2">BANK DETAILS REQUIRED</h3>
-        <p className="text-[#6b7280] text-sm max-w-md mx-auto mb-1">
-          You need to add your bank account details before creating a listing.
-          This is required to receive guest payments via Razorpay Route.
-        </p>
-        <p className="text-[#6b7280] text-xs">
-          Go to <span className="text-cyan-400">Profile</span> → <span className="text-white">Bank Details for Payouts</span> to add your account.
-        </p>
-      </div>
-    );
-  }
+  // if (!hasBankDetails) {
+  //   return (
+  //     <div className="bg-[#161929] border border-amber-500/30 rounded-xl p-8 text-center">
+  //       <CreditCard size={32} className="text-amber-400 mx-auto mb-4" />
+  //       <h3 className="font-heading text-lg font-bold text-white tracking-wide mb-2">BANK DETAILS REQUIRED</h3>
+  //       <p className="text-[#6b7280] text-sm max-w-md mx-auto mb-1">
+  //         You need to add your bank account details before creating a listing.
+  //         This is required to receive guest payments via Razorpay Route.
+  //       </p>
+  //       <p className="text-[#6b7280] text-xs">
+  //         Go to <span className="text-cyan-400">Profile</span> → <span className="text-white">Bank Details for Payouts</span> to add your account.
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   if (submitted) {
     return (
@@ -693,8 +693,8 @@ export function ListingStepper() {
                     i < currentStep
                       ? "bg-cyan-500 border-cyan-500 text-[#002661]"
                       : i === currentStep
-                      ? "bg-cyan-500/20 border-cyan-400 text-cyan-400"
-                      : "bg-[#1a1d2e] border-[#2a2d45] text-[#6b7280]"
+                        ? "bg-cyan-500/20 border-cyan-400 text-cyan-400"
+                        : "bg-[#1a1d2e] border-[#2a2d45] text-[#6b7280]"
                   )}
                 >
                   {i < currentStep ? <Check size={12} /> : i + 1}
